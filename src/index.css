@@ -2,41 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Infinity Notes: Nihiltheism Explorer Design System
+Dark contemplative aesthetic for philosophical PKM
 */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core contemplative palette - deep darks for focus */
+    --background: 220 13% 7%;          /* #121212 - Deep contemplative base */
+    --foreground: 210 40% 98%;         /* Near white for primary text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 218 11% 15%;               /* #262628 - Card backgrounds */
+    --card-foreground: 210 40% 95%;    /* Card text */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 218 11% 15%;
+    --popover-foreground: 210 40% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Philosophical accent colors - purple/blue for PKM features */
+    --primary: 250 100% 70%;           /* Vibrant purple for primary actions */
+    --primary-foreground: 220 13% 7%;  /* Dark text on bright backgrounds */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 218 11% 25%;          /* Subtle secondary backgrounds */
+    --secondary-foreground: 210 40% 85%; /* Secondary text */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 218 11% 20%;              /* Muted backgrounds */
+    --muted-foreground: 210 20% 65%;   /* Subtle text */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 100% 60%;            /* Blue accent for highlights */
+    --accent-foreground: 220 13% 7%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* Philosophical state colors */
+    --void: 270 50% 40%;               /* Deep purple for void concepts */
+    --resonance: 200 100% 50%;         /* Cyan for transcendent resonance */
+    --synthesis: 300 60% 60%;          /* Magenta for cross-cultural synthesis */
+
+    /* System colors */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 218 11% 25%;             /* Subtle borders */
+    --input: 218 11% 20%;              /* Input backgrounds */
+    --ring: 250 100% 70%;              /* Focus rings match primary */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Contemplative gradients */
+    --gradient-void: linear-gradient(135deg, hsl(270 50% 20%), hsl(220 13% 7%));
+    --gradient-resonance: linear-gradient(135deg, hsl(200 100% 30%), hsl(250 100% 40%));
+    --gradient-synthesis: linear-gradient(135deg, hsl(300 60% 30%), hsl(200 100% 30%));
+
+    /* Subtle animations for meditative experience */
+    --transition-contemplative: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-swift: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Shadows for depth */
+    --shadow-contemplative: 0 10px 40px -10px hsl(220 13% 0% / 0.3);
+    --shadow-focus: 0 0 30px hsl(250 100% 70% / 0.2);
 
     --sidebar-background: 0 0% 98%;
 
@@ -52,46 +75,9 @@ All colors MUST be HSL.
 
     --sidebar-border: 220 13% 91%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  /* Remove dark mode - we're always in contemplative dark mode */
 }
 
 @layer base {
@@ -101,5 +87,93 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Typography for philosophical content */
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Monaco', 'Cascadia Code', monospace;
+  }
+
+  /* Contemplative scroll behavior */
+  * {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+    transition: background-color 0.2s;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+}
+
+@layer components {
+  /* Philosophical component variants */
+  .gradient-void {
+    background: var(--gradient-void);
+  }
+
+  .gradient-resonance {
+    background: var(--gradient-resonance);
+  }
+
+  .gradient-synthesis {
+    background: var(--gradient-synthesis);
+  }
+
+  .transition-contemplative {
+    transition: var(--transition-contemplative);
+  }
+
+  .transition-swift {
+    transition: var(--transition-swift);
+  }
+
+  .shadow-contemplative {
+    box-shadow: var(--shadow-contemplative);
+  }
+
+  .shadow-focus {
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* Void resonance score indicators */
+  .resonance-low {
+    @apply text-muted-foreground;
+  }
+
+  .resonance-medium {
+    color: hsl(var(--resonance) / 0.7);
+  }
+
+  .resonance-high {
+    color: hsl(var(--resonance));
+  }
+
+  /* Concept type indicators */
+  .concept-void {
+    color: hsl(var(--void));
+  }
+
+  .concept-resonance {
+    color: hsl(var(--resonance));
+  }
+
+  .concept-synthesis {
+    color: hsl(var(--synthesis));
   }
 }

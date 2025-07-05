@@ -52,6 +52,10 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Philosophical color system
+				void: 'hsl(var(--void))',
+				resonance: 'hsl(var(--resonance))',
+				synthesis: 'hsl(var(--synthesis))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
