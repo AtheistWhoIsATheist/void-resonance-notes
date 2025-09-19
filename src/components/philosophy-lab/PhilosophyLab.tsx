@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { nihiltheismFramework, IterativeDensificationResult } from '@/lib/nihiltheism-framework';
 import { toast } from '@/hooks/use-toast';
+import { SaveToVaultButton } from '@/components/ui/SaveToVaultButton';
+import { CopyAsMarkdownButton } from '@/components/ui/CopyAsMarkdownButton';
 
 interface DialogueEntry {
   id: string;
@@ -385,6 +387,27 @@ Would you like to explore any of these dimensions more deeply?`;
                                   {entry.densificationResult.synthesisInsight}
                                 </p>
                               </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Save to Vault toolbar for Professor responses */}
+                        {entry.type === 'professor' && dialogue.length > 1 && (
+                          <div className="mt-4 pt-4 border-t border-border/50">
+                            <div className="flex items-center gap-2">
+                              <SaveToVaultButton
+                                prompt={dialogue.find(d => d.type === 'user' && dialogue.indexOf(d) === dialogue.indexOf(entry) - 1)?.content || ''}
+                                response={entry.content}
+                                source="PhilosophyLab"
+                                className="text-xs h-7 px-2"
+                                onSaved={(id) => console.log('Saved dialogue:', id)}
+                              />
+                              <CopyAsMarkdownButton
+                                prompt={dialogue.find(d => d.type === 'user' && dialogue.indexOf(d) === dialogue.indexOf(entry) - 1)?.content || ''}
+                                response={entry.content}
+                                source="PhilosophyLab"
+                                className="text-xs h-7 px-2"
+                              />
                             </div>
                           </div>
                         )}

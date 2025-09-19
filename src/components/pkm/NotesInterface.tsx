@@ -34,6 +34,19 @@ export const NotesInterface = () => {
 
   useEffect(() => {
     loadNotes();
+    
+    // Listen for vault-note-added events
+    const handleVaultNoteAdded = (event: any) => {
+      const note = event.detail;
+      setNotes(prev => [note, ...prev]);
+      toast({
+        title: "Note Added to Vault",
+        description: `"${note.title}" has been added to your collection.`
+      });
+    };
+    
+    window.addEventListener('vault-note-added', handleVaultNoteAdded);
+    return () => window.removeEventListener('vault-note-added', handleVaultNoteAdded);
   }, []);
 
   const loadNotes = () => {

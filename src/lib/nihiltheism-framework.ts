@@ -24,6 +24,15 @@ export interface Note {
   updatedAt: Date;
   densificationLevel: number;
   voidResonanceScore?: number;
+  metadata?: {
+    prompt?: string;
+    response?: string;
+    presetName?: string;
+    model?: string;
+    framework?: string;
+    source?: string;
+    idempotencyKey?: string;
+  };
 }
 
 export interface IterativeDensificationResult {
