@@ -10,6 +10,7 @@ import Nihilism from "./pages/Nihilism";
 import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
 import NotFound from "./pages/NotFound";
+import PromptForge from "./pages/PromptForge";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/nihilism" element={<Nihilism />} />
           <Route path="/nihiltheism" element={<Nihiltheism />} />
           <Route path="/analysis" element={<Analysis />} />
+          <Route path="/prompt-forge" element={<PromptForge />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
