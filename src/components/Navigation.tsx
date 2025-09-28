@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  BookOpen, 
-  Brain, 
-  Search, 
-  FileQuestion, 
+import {
+  BookOpen,
+  Brain,
+  Search,
+  FileQuestion,
   Lightbulb,
-  Infinity
+  Infinity,
+  NotebookPen
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -21,6 +22,7 @@ export const Navigation = () => {
     { path: '/nihilism', label: 'Nihilism', icon: Search },
     { path: '/nihiltheism', label: 'Nihiltheism', icon: Lightbulb },
     { path: '/analysis', label: 'Analysis', icon: FileQuestion },
+    { path: '/journal314', label: 'Journal314', icon: NotebookPen },
   ];
 
   const isActive = (path: string) => location.pathname === path;

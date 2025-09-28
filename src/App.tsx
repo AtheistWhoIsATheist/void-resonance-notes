@@ -9,6 +9,7 @@ import PhilosophyLab from "./pages/PhilosophyLab";
 import Nihilism from "./pages/Nihilism";
 import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
+import Journal314 from "./pages/Journal314";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/nihilism" element={<Nihilism />} />
           <Route path="/nihiltheism" element={<Nihiltheism />} />
           <Route path="/analysis" element={<Analysis />} />
+          <Route path="/journal314" element={<Journal314 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
