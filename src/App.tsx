@@ -9,6 +9,7 @@ import PhilosophyLab from "./pages/PhilosophyLab";
 import Nihilism from "./pages/Nihilism";
 import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
+import PromptForge from "./pages/PromptForge";
 import NotFound from "./pages/NotFound";
 import PromptForge from "./pages/PromptForge";
 
