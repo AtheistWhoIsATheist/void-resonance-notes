@@ -11,6 +11,7 @@ import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
 import PromptForge from "./pages/PromptForge";
 import NotFound from "./pages/NotFound";
+import PromptForge from "./pages/PromptForge";
 
 const queryClient = new QueryClient();
 
