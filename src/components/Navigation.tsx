@@ -1,13 +1,25 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+ codex/extract-and-infer-quotes-from-philosophers
 import {
+
+import { 
+ main
   BookOpen,
   Brain,
   Search,
   FileQuestion,
   Lightbulb,
   Infinity,
+ codex/extract-and-infer-quotes-from-philosophers
   NotebookPen
+
+ codex/update-ui-layout-and-features
+  Hammer
+
+  Sparkles
+ main
+ main
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -16,13 +28,18 @@ export const Navigation = () => {
   const primaryRoutes = [
     { path: '/notes', label: 'Notes', icon: BookOpen, accent: true },
     { path: '/philosophy-lab', label: 'Philosophy Lab', icon: Brain, accent: true },
+    { path: '/prompt-forge', label: 'Prompt Forge', icon: Sparkles, accent: true },
   ];
 
   const secondaryRoutes = [
     { path: '/nihilism', label: 'Nihilism', icon: Search },
     { path: '/nihiltheism', label: 'Nihiltheism', icon: Lightbulb },
     { path: '/analysis', label: 'Analysis', icon: FileQuestion },
+ codex/extract-and-infer-quotes-from-philosophers
     { path: '/journal314', label: 'Journal314', icon: NotebookPen },
+
+    { path: '/prompt-forge', label: 'Prompt Forge', icon: Hammer },
+ main
   ];
 
   const isActive = (path: string) => location.pathname === path;
