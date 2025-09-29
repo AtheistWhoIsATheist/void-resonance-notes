@@ -9,11 +9,6 @@ import PhilosophyLab from "./pages/PhilosophyLab";
 import Nihilism from "./pages/Nihilism";
 import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
- codex/extract-and-infer-quotes-from-philosophers
-import Journal314 from "./pages/Journal314";
-
-import PromptForge from "./pages/PromptForge";
- main
 import NotFound from "./pages/NotFound";
 import PromptForge from "./pages/PromptForge";
 
@@ -32,11 +27,7 @@ const App = () => (
           <Route path="/nihilism" element={<Nihilism />} />
           <Route path="/nihiltheism" element={<Nihiltheism />} />
           <Route path="/analysis" element={<Analysis />} />
- codex/extract-and-infer-quotes-from-philosophers
-          <Route path="/journal314" element={<Journal314 />} />
-
           <Route path="/prompt-forge" element={<PromptForge />} />
- main
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
