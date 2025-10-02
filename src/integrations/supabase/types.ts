@@ -14,7 +14,229 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      collections: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          sort_order: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      note_tags: {
+        Row: {
+          created_at: string | null
+          note_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          note_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string | null
+          note_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "note_tags_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          collection_id: string | null
+          content: string | null
+          created_at: string | null
+          custom_metadata: Json | null
+          detected_concepts: Json | null
+          id: string
+          source: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          void_resonance_score: number | null
+        }
+        Insert: {
+          collection_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          custom_metadata?: Json | null
+          detected_concepts?: Json | null
+          id?: string
+          source?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          void_resonance_score?: number | null
+        }
+        Update: {
+          collection_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          custom_metadata?: Json | null
+          detected_concepts?: Json | null
+          id?: string
+          source?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          void_resonance_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          category: string | null
+          color: string | null
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          anthropic_api_key: string | null
+          created_at: string | null
+          default_model: string | null
+          id: string
+          openai_api_key: string | null
+          preferred_ai_provider:
+            | Database["public"]["Enums"]["ai_provider"]
+            | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          anthropic_api_key?: string | null
+          created_at?: string | null
+          default_model?: string | null
+          id?: string
+          openai_api_key?: string | null
+          preferred_ai_provider?:
+            | Database["public"]["Enums"]["ai_provider"]
+            | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          anthropic_api_key?: string | null
+          created_at?: string | null
+          default_model?: string | null
+          id?: string
+          openai_api_key?: string | null
+          preferred_ai_provider?:
+            | Database["public"]["Enums"]["ai_provider"]
+            | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +245,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      ai_provider: "lovable" | "openai" | "anthropic"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +372,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      ai_provider: ["lovable", "openai", "anthropic"],
+    },
   },
 } as const

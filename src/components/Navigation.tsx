@@ -1,5 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   BookOpen,
   Brain,
@@ -7,11 +14,15 @@ import {
   FileQuestion,
   Lightbulb,
   Infinity,
-  Sparkles
+  Sparkles,
+  User,
+  LogOut,
+  Settings
 } from 'lucide-react';
 
 export const Navigation = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const primaryRoutes = [
     { path: '/notes', label: 'Notes', icon: BookOpen, accent: true },
@@ -83,6 +94,33 @@ export const Navigation = () => {
                 </Button>
               );
             })}
+            
+            {/* User Menu */}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="ml-2">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>
+                    <User className="mr-2 h-4 w-4" />
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
