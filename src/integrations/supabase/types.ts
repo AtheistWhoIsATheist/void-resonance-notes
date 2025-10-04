@@ -67,6 +67,138 @@ export type Database = {
           },
         ]
       }
+      conceptual_lacunae: {
+        Row: {
+          created_at: string
+          id: string
+          missing_concept_id: string
+          notes_count: number
+          priority_score: number
+          related_concepts: Json
+          suggested_traditions: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          missing_concept_id: string
+          notes_count?: number
+          priority_score?: number
+          related_concepts?: Json
+          suggested_traditions?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          missing_concept_id?: string
+          notes_count?: number
+          priority_score?: number
+          related_concepts?: Json
+          suggested_traditions?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cross_tradition_bridges: {
+        Row: {
+          ai_generated: boolean
+          bridge_concept: string
+          created_at: string
+          description: string | null
+          id: string
+          resonance_score: number
+          supporting_note_ids: Json
+          tradition_a: string
+          tradition_b: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          bridge_concept: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          resonance_score?: number
+          supporting_note_ids?: Json
+          tradition_a: string
+          tradition_b: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean
+          bridge_concept?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          resonance_score?: number
+          supporting_note_ids?: Json
+          tradition_a?: string
+          tradition_b?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      note_concept_links: {
+        Row: {
+          ai_generated: boolean
+          created_at: string
+          id: string
+          link_strength: number
+          link_type: string
+          shared_concepts: Json
+          source_note_id: string
+          target_note_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          created_at?: string
+          id?: string
+          link_strength?: number
+          link_type?: string
+          shared_concepts?: Json
+          source_note_id: string
+          target_note_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean
+          created_at?: string
+          id?: string
+          link_strength?: number
+          link_type?: string
+          shared_concepts?: Json
+          source_note_id?: string
+          target_note_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "note_concept_links_source_note_id_fkey"
+            columns: ["source_note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_concept_links_target_note_id_fkey"
+            columns: ["target_note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       note_tags: {
         Row: {
           created_at: string | null

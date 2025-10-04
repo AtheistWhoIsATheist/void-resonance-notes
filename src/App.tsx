@@ -8,6 +8,7 @@ import { hasLocalStorageNotes } from "@/utils/localStorageMigration";
 import Index from "./pages/Index";
 import Notes from "./pages/Notes";
 import PhilosophyLab from "./pages/PhilosophyLab";
+import KnowledgeAtlas from "./pages/KnowledgeAtlas";
 import Nihilism from "./pages/Nihilism";
 import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
@@ -132,6 +133,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <PromptForge />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/knowledge-atlas"
+          element={
+            <ProtectedRoute>
+              <KnowledgeAtlas />
             </ProtectedRoute>
           }
         />

@@ -17,7 +17,8 @@ import {
   Sparkles,
   User,
   LogOut,
-  Settings
+  Settings,
+  Network
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -27,6 +28,7 @@ export const Navigation = () => {
   const primaryRoutes = [
     { path: '/notes', label: 'Notes', icon: BookOpen, accent: true },
     { path: '/philosophy-lab', label: 'Philosophy Lab', icon: Brain, accent: true },
+    { path: '/knowledge-atlas', label: 'Knowledge Atlas', icon: Network, accent: true },
     { path: '/prompt-forge', label: 'Prompt Forge', icon: Sparkles, accent: true },
   ];
 
