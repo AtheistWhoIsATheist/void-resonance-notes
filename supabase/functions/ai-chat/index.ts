@@ -11,8 +11,13 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, model = 'google/gemini-2.5-flash', userId, includeContext = false } = await req.json();
+    const { messages, model = 'google/gemini-2.5-flash', includeContext = false } = await req.json();
     
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
@@ -21,9 +26,48 @@ serve(async (req) => {
     // Build system prompt with optional context
     let systemPrompt = 'You are a philosophical AI assistant specializing in nihilism, existentialism, and void-resonance theory. Provide thoughtful, nuanced insights.';
     
-    if (includeContext && userId) {
-      // Future: fetch user's notes and concepts for context
-      systemPrompt += '\n\nYou have access to the user\'s philosophical notes and concepts to provide context-aware responses.';
+    if (includeContext) {
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (user && !userError) {
+        console.log('Fetching user context for AI chat...');
+        
+        // Fetch recent notes for context
+        const { data: notes, error: notesError } = await supabase
+          .from('notes')
+          .select('title, content, detected_concepts, void_resonance_score')
+          .eq('user_id', user.id)
+          .order('updated_at', { ascending: false })
+          .limit(10);
+
+        if (!notesError && notes && notes.length > 0) {
+          const notesContext = notes.map(note => 
+            `- ${note.title}: ${note.content.substring(0, 200)}... (Concepts: ${(note.detected_concepts || []).join(', ')}, Resonance: ${note.void_resonance_score || 'N/A'})`
+          ).join('\n');
+          
+          systemPrompt += `\n\nYou have access to the user's recent philosophical notes:\n${notesContext}\n\nUse this context to provide more personalized and contextually relevant responses.`;
+        }
+
+        // Fetch user's tags for additional context
+        const { data: tags, error: tagsError } = await supabase
+          .from('tags')
+          .select('name, category')
+          .eq('user_id', user.id)
+          .limit(20);
+
+        if (!tagsError && tags && tags.length > 0) {
+          const tagsContext = tags.map(tag => tag.name).join(', ');
+          systemPrompt += `\n\nUser's philosophical interests/tags: ${tagsContext}`;
+        }
+      }
     }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
