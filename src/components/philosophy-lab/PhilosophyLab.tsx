@@ -5,27 +5,118 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Send, 
-  Brain, 
-  Sparkles, 
-  FileText, 
+import {
+  Send,
+  Brain,
+  Sparkles,
+  FileText,
   Layers,
   Download,
-  RotateCcw
+  RotateCcw,
+  Orbit
 } from 'lucide-react';
 import { nihiltheismFramework, IterativeDensificationResult } from '@/lib/nihiltheism-framework';
 import { toast } from '@/hooks/use-toast';
 import { SaveToVaultButton } from '@/components/ui/SaveToVaultButton';
 import { CopyAsMarkdownButton } from '@/components/ui/CopyAsMarkdownButton';
 
+type DialogueEntryType = 'user' | 'agent' | 'synthesis';
+
+interface Persona {
+  id: string;
+  name: string;
+  role: string;
+  description: string;
+  emphasis: string[];
+  accentClass: string;
+  badgeClass: string;
+}
+
 interface DialogueEntry {
   id: string;
-  type: 'user' | 'professor';
+  type: DialogueEntryType;
   content: string;
   timestamp: Date;
   concepts?: string[];
   densificationResult?: IterativeDensificationResult;
+  personaId?: string;
+  personaName?: string;
+  personaRole?: string;
+}
+
+type StoredDialogueEntry = Omit<DialogueEntry, 'timestamp'> & { timestamp: string };
+
+const personas: Persona[] = [
+  {
+    id: 'mystic-exegete',
+    name: 'Mystic Exegete',
+    role: 'Void-saturated contemplative',
+    description: 'Translates void-experience into luminous mystical insight and ritual praxis.',
+    emphasis: ['void', 'transcendence', 'paradox'],
+    accentClass: 'border-purple-500/40 bg-gradient-to-br from-purple-500/10 to-background',
+    badgeClass: 'bg-purple-500/15 text-purple-200 border-purple-400/30'
+  },
+  {
+    id: 'analytic-skeptic',
+    name: 'Analytic Skeptic',
+    role: 'Rigorous dialectician',
+    description: 'Tests claims for coherence, exposes hidden assumptions, and maps logical pressure points.',
+    emphasis: ['analysis', 'paradox', 'methodology'],
+    accentClass: 'border-sky-500/40 bg-gradient-to-br from-sky-500/10 to-background',
+    badgeClass: 'bg-sky-500/15 text-sky-200 border-sky-400/30'
+  },
+  {
+    id: 'historical-archivist',
+    name: 'Historical Archivist',
+    role: 'Comparative lineage tracker',
+    description: 'Excavates resonances across traditions, citing precedent voices and cross-cultural bridges.',
+    emphasis: ['history', 'tradition', 'resonance'],
+    accentClass: 'border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-background',
+    badgeClass: 'bg-amber-500/15 text-amber-200 border-amber-400/30'
+  }
+];
+
+const personaMap = personas.reduce<Record<string, Persona>>((acc, persona) => {
+  acc[persona.id] = persona;
+  return acc;
+}, {});
+
+const getEntryStyles = (entry: DialogueEntry) => {
+  if (entry.type === 'user') {
+    return {
+      container: 'bg-primary text-primary-foreground',
+      badge: 'bg-primary-foreground/20 text-primary-foreground'
+    };
+  }
+
+  if (entry.type === 'agent' && entry.personaId) {
+    const persona = personaMap[entry.personaId];
+    if (persona) {
+      return {
+        container: `bg-card border ${persona.accentClass}`,
+        badge: `border ${persona.badgeClass}`
+      };
+    }
+  }
+
+  if (entry.type === 'synthesis') {
+    return {
+      container: 'bg-card border border-resonance/40 bg-gradient-to-br from-resonance/10 to-background',
+      badge: 'bg-resonance/20 text-resonance border-resonance/40'
+    };
+  }
+
+  return {
+    container: 'bg-card border',
+    badge: 'bg-muted text-foreground'
+  };
+};
+
+interface QueryAnalysis {
+  hasVoidThemes: boolean;
+  hasTranscendentThemes: boolean;
+  hasParadoxThemes: boolean;
+  concepts: string[];
 }
 
 export const PhilosophyLab = () => {
@@ -38,31 +129,38 @@ export const PhilosophyLab = () => {
     // Load previous dialogue
     const savedDialogue = localStorage.getItem('philosophy-lab-dialogue');
     if (savedDialogue) {
-      const parsedDialogue = JSON.parse(savedDialogue).map((entry: any) => ({
-        ...entry,
-        timestamp: new Date(entry.timestamp),
-      }));
+      const parsedDialogue = (JSON.parse(savedDialogue) as StoredDialogueEntry[]).map((entry) => {
+        const legacyType = entry.type === 'professor' ? 'agent' : entry.type;
+        const personaId = entry.personaId || (legacyType === 'agent' ? 'mystic-exegete' : undefined);
+        const persona = personaId ? personaMap[personaId] : undefined;
+
+        return {
+          ...entry,
+          type: legacyType as DialogueEntryType,
+          timestamp: new Date(entry.timestamp),
+          personaId,
+          personaName: entry.personaName || persona?.name,
+          personaRole: entry.personaRole || persona?.role,
+        } as DialogueEntry;
+      });
       setDialogue(parsedDialogue);
     } else {
       // Initialize with welcome message
       const welcomeMessage: DialogueEntry = {
         id: Date.now().toString(),
-        type: 'professor',
-        content: `Welcome to the Philosophy Laboratory. I am Professor Nihil, your guide through the depths of Nihiltheistic inquiry.
+        type: 'agent',
+        content: `Welcome to the Philosophy Laboratory. Professor Nihil now convenes a **Symphonic Colloquium**—a council of three specialised intelligences who respond in parallel to each prompt.
 
-This space is designed for recursive-dialectic exploration of philosophical questions, particularly those concerning void-experience, transcendence, and the paradoxical nature of existence.
+**Meet the ensemble:**
+• *Mystic Exegete* translates void-experience into luminous mystical praxis.
+• *Analytic Skeptic* interrogates logic, structure, and methodological coherence.
+• *Historical Archivist* excavates cross-cultural precedents and resonant lineages.
 
-**What we can explore together:**
-• Existential questions through the Nihiltheism framework
-• Iterative densification of complex concepts  
-• Cross-cultural synthesis of mystical traditions
-• Phenomenological analysis of void-to-resonance transitions
-
-**How to engage:**
-Simply pose your question or share your philosophical intuition. I will respond through the lens of Nihiltheistic analysis, and you can request deeper exploration through iterative densification.
-
-What philosophical territory shall we explore first?`,
+Pose your philosophical intuition and the ensemble will debate, contrast, and return with a comparative synthesis you can densify or archive. What territory shall we open first?`,
         timestamp: new Date(),
+        personaId: 'mystic-exegete',
+        personaName: 'Professor Nihil — Symphonic Host',
+        personaRole: 'Orchestrating guide',
       };
       setDialogue([welcomeMessage]);
     }
@@ -73,75 +171,127 @@ What philosophical territory shall we explore first?`,
     localStorage.setItem('philosophy-lab-dialogue', JSON.stringify(newDialogue));
   };
 
-  const generateProfessorResponse = (userQuery: string): string => {
+  const analyzeQueryThemes = (userQuery: string): QueryAnalysis => {
     const concepts = nihiltheismFramework.detectConcepts(userQuery);
     const lowerQuery = userQuery.toLowerCase();
-    
-    // Analyze query themes
-    const hasVoidThemes = ['void', 'empty', 'nothing', 'meaningless', 'nihil'].some(term => 
-      lowerQuery.includes(term)
-    );
-    
-    const hasTranscendentThemes = ['transcendent', 'sacred', 'divine', 'spiritual', 'mystical'].some(term => 
-      lowerQuery.includes(term)
-    );
-    
-    const hasParadoxThemes = ['paradox', 'contradiction', 'both', 'neither', 'tension'].some(term => 
+
+    const hasVoidThemes = ['void', 'empty', 'nothing', 'meaningless', 'nihil', 'abyss'].some(term =>
       lowerQuery.includes(term)
     );
 
-    let response = '';
+    const hasTranscendentThemes = ['transcendent', 'sacred', 'divine', 'spiritual', 'mystical', 'sublime'].some(term =>
+      lowerQuery.includes(term)
+    );
 
-    if (hasVoidThemes && hasTranscendentThemes) {
-      response = `Your inquiry touches the very heart of Nihiltheistic insight - the recognition that void-experience and transcendent encounter are not opposed but intimately related.
+    const hasParadoxThemes = ['paradox', 'contradiction', 'both', 'neither', 'tension', 'dialectic'].some(term =>
+      lowerQuery.includes(term)
+    );
 
-The apparent meaninglessness you reference serves as what we might call a **phenomenological aperture** - a privileged site where ordinary consciousness dissolves sufficiently to allow deeper dimensions of reality to emerge.
+    return { hasVoidThemes, hasTranscendentThemes, hasParadoxThemes, concepts };
+  };
 
-Consider: Is the void you experience mere absence, or might it be pregnant with possibilities not yet recognized by conceptual mind? The mystical traditions suggest that what appears as pure negation often functions as the threshold to radical affirmation.`;
-    } else if (hasVoidThemes) {
-      response = `The void-experience you describe is significant philosophically. Rather than mere absence, Nihiltheism recognizes such experiences as potentially revelatory.
+  const generatePersonaResponse = (persona: Persona, userQuery: string, analysis: QueryAnalysis): string => {
+    const baseConcept = analysis.concepts[0] ? nihiltheismFramework.getConcept(analysis.concepts[0]) : null;
+    const conceptLine = baseConcept
+      ? `The ${baseConcept.name} vector surfaces strongly here, especially in relation to ${baseConcept.crossReferences.join(', ')}.`
+      : 'No dominant framework vector is explicit, which means we listen for latent resonances in your phrasing.';
 
-**Key considerations:**
-• The void as foundational openness rather than simple negation
-• Emptiness as space for emergence rather than mere lack
-• The relationship between apparent meaninglessness and hidden significance
+    if (persona.id === 'mystic-exegete') {
+      const threshold = analysis.hasVoidThemes && analysis.hasTranscendentThemes
+        ? 'a shimmering threshold where negation and revelation braid together'
+        : analysis.hasVoidThemes
+          ? 'the abyssal hush that precedes revelation'
+          : analysis.hasTranscendentThemes
+            ? 'the subtle luminosity seeking articulation'
+            : 'a subterranean longing for the sacred that hides beneath rational inquiry';
 
-What emerges when you sit with this void-experience without immediately trying to fill it or escape from it?`;
-    } else if (hasTranscendentThemes) {
-      response = `Your question regarding transcendence invites us to examine the nature of the sacred in our contemporary context.
+      return `I attune to ${threshold}. ${conceptLine}
 
-From a Nihiltheistic perspective, authentic transcendent encounter often emerges precisely through - not in spite of - experiences of meaninglessness, dissolution, or existential crisis.
+**Liturgical gestures to explore:**
+• Contemplate the void not as absence but as *pleroma*, the pregnant openness awaiting acknowledgement.
+• Track the breath across the moment where meaning falls away—notice what flickers in the wake of surrender.
+• Allow paradox to remain unresolved; the resonance field is strongest when contradiction is held gently.
 
-**Phenomenological markers of authentic transcendence:**
-• Disruption of ordinary reference points
-• Expansion of awareness beyond ego-boundaries  
-• Recognition of interconnectedness previously hidden
-• Integration of opposites (void/fullness, absence/presence)
-
-How does this resonate with your own experience of the transcendent?`;
-    } else if (concepts.length > 0) {
-      const concept = nihiltheismFramework.getConcept(concepts[0]);
-      response = `Your inquiry engages with the ${concept?.name} aspect of our framework.
-
-${concept?.description}
-
-This connects to broader questions about ${concept?.crossReferences.join(', ')} and invites deeper exploration through our iterative densification methodology.
-
-Would you like to pursue this thread further through systematic analysis?`;
-    } else {
-      response = `Your question opens interesting philosophical territory. Let me approach it through the Nihiltheistic lens.
-
-Every genuine philosophical inquiry contains implicit assumptions about the nature of reality, consciousness, and meaning. Often, the most fruitful exploration begins by examining what we take for granted.
-
-**Methodological approach:**
-1. **Conceptual Mapping**: What key concepts and assumptions underlie your question?
-2. **Cross-Cultural Synthesis**: How might different wisdom traditions illuminate this issue?
-3. **Phenomenological Analysis**: What is the lived experience of this question?
-
-Would you like to explore any of these dimensions more deeply?`;
+Stay with the felt texture of this question and tell us how the void responds.`;
     }
 
-    return response;
+    if (persona.id === 'analytic-skeptic') {
+      const emphasis = analysis.hasParadoxThemes
+        ? 'Your framing already acknowledges paradox—let us diagram its structure before trusting its promise.'
+        : 'To move responsibly, we should map the logical scaffolding that is currently implicit.';
+
+      return `${emphasis}
+
+**Analytic probes:**
+1. What unstated premises link your intuition to conclusions about meaning or transcendence?
+2. Which terms risk equivocation (void, sacred, self)? Clarify them before synthesis.
+3. Where might experiential testimony be over-generalised into metaphysical claim?
+
+${conceptLine}
+
+Offer a refinement or counter-example and I will continue the dialectic.`;
+    }
+
+    // historical archivist
+    const traditionThread = analysis.concepts.length > 0
+      ? analysis.concepts
+          .map((id) => nihiltheismFramework.getConcept(id))
+          .filter(Boolean)
+          .slice(0, 3)
+          .map((concept) => `• ${concept?.name}: ${concept?.description}`)
+          .join('\n')
+      : '• Mahayana accounts of śūnyatā meeting Christian apophaticism\n• Ibn ʿArabī’s fanāʾ as annihilation-into-presence\n• Existential phenomenology reading crisis as an opening to authenticity';
+
+    return `I rummage through the archive and find precedents that echo your concern.
+
+**Lineage fragments:**
+${traditionThread}
+
+Notice how each tradition stages the oscillation between negation and affirmation. ${conceptLine}
+
+What additional sources should we bring into this comparative weave?`;
+  };
+
+  const generateSymphonicSynthesis = (
+    personaEntries: DialogueEntry[],
+    analysis: QueryAnalysis
+  ): DialogueEntry | null => {
+    if (personaEntries.length === 0) return null;
+
+    const highlights = personaEntries.map((entry) => {
+      const persona = entry.personaName || 'Agent';
+      const firstSentence = entry.content.split(/(?<=\.)\s+/)[0] || entry.content;
+      return `• **${persona}:** ${firstSentence.trim()}`;
+    }).join('\n');
+
+    const uniqueConcepts = Array.from(new Set(personaEntries.flatMap((entry) => entry.concepts || [])));
+    const conceptBadges = uniqueConcepts
+      .map((id) => nihiltheismFramework.getConcept(id))
+      .filter(Boolean)
+      .map((concept) => `- ${concept?.name} (${concept?.category})`)
+      .join('\n');
+
+    const nextSteps = analysis.hasParadoxThemes
+      ? 'Lean into the paradox you articulated—invite each agent to argue the opposite stance and observe emergent resonance.'
+      : analysis.hasVoidThemes
+        ? 'Describe the phenomenology of your void-encounter in more detail so the ensemble can calibrate precisely.'
+        : analysis.hasTranscendentThemes
+          ? 'Specify the markers of transcendence you trust; the ensemble will test them against both logic and lineage.'
+          : 'Pose a follow-up that adds either an experiential vignette or a concrete historical case to ground the dialogue.';
+
+    return {
+      id: `${Date.now()}-synthesis`,
+      type: 'synthesis',
+      content: `**Symphonic Synthesis**
+${highlights}
+
+${conceptBadges ? `**Shared conceptual field:**\n${conceptBadges}\n\n` : ''}**Next movement:** ${nextSteps}`,
+      timestamp: new Date(),
+      concepts: uniqueConcepts,
+      personaId: 'symphonic-synthesis',
+      personaName: 'Symphonic Synthesis Engine',
+      personaRole: 'Integrative conductor'
+    };
   };
 
   const handleSubmit = async () => {
@@ -157,19 +307,27 @@ Would you like to explore any of these dimensions more deeply?`;
       timestamp: new Date(),
     };
 
-    // Generate professor response
-    const professorResponse = generateProfessorResponse(userInput);
-    const concepts = nihiltheismFramework.detectConcepts(userInput);
-    
-    const professorMessage: DialogueEntry = {
-      id: (Date.now() + 1).toString(),
-      type: 'professor',
-      content: professorResponse,
-      timestamp: new Date(),
-      concepts,
-    };
+    const analysis = analyzeQueryThemes(userInput);
 
-    const newDialogue = [...dialogue, userMessage, professorMessage];
+    const personaMessages = personas.map((persona, index) => {
+      const response = generatePersonaResponse(persona, userInput, analysis);
+      return {
+        id: `${Date.now()}-${persona.id}-${index}`,
+        type: 'agent' as const,
+        content: response,
+        timestamp: new Date(),
+        concepts: analysis.concepts,
+        personaId: persona.id,
+        personaName: persona.name,
+        personaRole: persona.role,
+      } satisfies DialogueEntry;
+    });
+
+    const synthesisEntry = generateSymphonicSynthesis(personaMessages, analysis);
+
+    const newDialogue = synthesisEntry
+      ? [...dialogue, userMessage, ...personaMessages, synthesisEntry]
+      : [...dialogue, userMessage, ...personaMessages];
     saveDialogue(newDialogue);
 
     setUserInput('');
@@ -190,8 +348,8 @@ Would you like to explore any of these dimensions more deeply?`;
     if (entry.type !== 'user') return;
 
     const result = nihiltheismFramework.performIterativeDensification(entry.content);
-    const updatedDialogue = dialogue.map(item => 
-      item.id === entry.id 
+    const updatedDialogue = dialogue.map(item =>
+      item.id === entry.id
         ? { ...item, densificationResult: result }
         : item
     );
@@ -261,13 +419,22 @@ Would you like to explore any of these dimensions more deeply?`;
     URL.revokeObjectURL(url);
   };
 
+  const getNearestUserPrompt = (currentIndex: number) => {
+    for (let i = currentIndex - 1; i >= 0; i -= 1) {
+      if (dialogue[i]?.type === 'user') {
+        return dialogue[i].content;
+      }
+    }
+    return '';
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Philosophy Laboratory</h1>
           <p className="text-muted-foreground">
-            Recursive-dialectic exploration with Professor Nihil
+            Symphonic multi-agent colloquium orchestrated by Professor Nihil
           </p>
         </div>
         <div className="flex space-x-2">
@@ -296,21 +463,21 @@ Would you like to explore any of these dimensions more deeply?`;
             <CardContent className="p-0">
               <ScrollArea className="h-[calc(100vh-20rem)] px-6" ref={scrollAreaRef}>
                 <div className="space-y-6 pb-4">
-                  {dialogue.map((entry) => (
+                  {dialogue.map((entry, index) => (
                     <div
                       key={entry.id}
                       className={`flex ${entry.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-[85%] ${
-                        entry.type === 'user' 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-card border'
-                      } rounded-lg p-4 transition-contemplative`}>
-                        
+                      <div className={`max-w-[85%] ${getEntryStyles(entry).container} rounded-lg p-4 transition-contemplative`}>
+
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <span className="font-medium text-sm">
-                              {entry.type === 'user' ? 'You' : 'Professor Nihil'}
+                              {entry.type === 'user'
+                                ? 'You'
+                                : entry.type === 'synthesis'
+                                  ? 'Symphonic Synthesis'
+                                  : entry.personaName || 'Agent'}
                             </span>
                             <span className="text-xs opacity-70">
                               {entry.timestamp.toLocaleTimeString()}
@@ -346,6 +513,14 @@ Would you like to explore any of these dimensions more deeply?`;
                             {entry.content}
                           </p>
                         </div>
+
+                        {entry.type !== 'user' && entry.personaRole && (
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <Badge variant="outline" className={`text-[10px] font-medium ${getEntryStyles(entry).badge}`}>
+                              {entry.personaRole}
+                            </Badge>
+                          </div>
+                        )}
 
                         {entry.concepts && entry.concepts.length > 0 && (
                           <div className="mt-3 pt-3 border-t border-border/50">
@@ -392,18 +567,18 @@ Would you like to explore any of these dimensions more deeply?`;
                         )}
 
                         {/* Save to Vault toolbar for Professor responses */}
-                        {entry.type === 'professor' && dialogue.length > 1 && (
+                        {entry.type !== 'user' && dialogue.length > 1 && (
                           <div className="mt-4 pt-4 border-t border-border/50">
                             <div className="flex items-center gap-2">
                               <SaveToVaultButton
-                                prompt={dialogue.find(d => d.type === 'user' && dialogue.indexOf(d) === dialogue.indexOf(entry) - 1)?.content || ''}
+                                prompt={getNearestUserPrompt(index)}
                                 response={entry.content}
                                 source="PhilosophyLab"
                                 className="text-xs h-7 px-2"
                                 onSaved={(id) => console.log('Saved dialogue:', id)}
                               />
                               <CopyAsMarkdownButton
-                                prompt={dialogue.find(d => d.type === 'user' && dialogue.indexOf(d) === dialogue.indexOf(entry) - 1)?.content || ''}
+                                prompt={getNearestUserPrompt(index)}
                                 response={entry.content}
                                 source="PhilosophyLab"
                                 className="text-xs h-7 px-2"
@@ -497,6 +672,35 @@ Would you like to explore any of these dimensions more deeply?`;
                       {starter}
                     </div>
                   </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Orbit className="h-4 w-4 text-resonance" />
+                Symphonic Ensemble
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {personas.map((persona) => (
+                  <div key={persona.id} className={`p-3 rounded-lg border ${persona.accentClass}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-sm text-foreground">{persona.name}</h4>
+                        <p className="text-[11px] text-muted-foreground">{persona.role}</p>
+                      </div>
+                      <Badge variant="outline" className={`text-[10px] border ${persona.badgeClass}`}>
+                        {persona.emphasis.join(' • ')}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                      {persona.description}
+                    </p>
+                  </div>
                 ))}
               </div>
             </CardContent>
