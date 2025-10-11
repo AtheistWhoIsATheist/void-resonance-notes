@@ -130,7 +130,7 @@ export const PhilosophyLab = () => {
     const savedDialogue = localStorage.getItem('philosophy-lab-dialogue');
     if (savedDialogue) {
       const parsedDialogue = (JSON.parse(savedDialogue) as StoredDialogueEntry[]).map((entry) => {
-        const legacyType = entry.type === 'professor' ? 'agent' : entry.type;
+        const legacyType = (entry.type as any) === 'professor' ? 'agent' : entry.type;
         const personaId = entry.personaId || (legacyType === 'agent' ? 'mystic-exegete' : undefined);
         const persona = personaId ? personaMap[personaId] : undefined;
 

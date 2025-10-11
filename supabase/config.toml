@@ -12,5 +12,8 @@ verify_jwt = true
 [functions.summarize-collection]
 verify_jwt = true
 
+[functions.bulk-import]
+verify_jwt = true
+
 [functions.maintain-knowledge-graph]
 verify_jwt = true
