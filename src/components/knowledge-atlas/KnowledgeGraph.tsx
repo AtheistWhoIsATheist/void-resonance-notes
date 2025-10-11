@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Network, Zap, AlertCircle, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Network, Zap, AlertCircle, ArrowRight, GitBranch } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { ForceGraphVisualization } from './ForceGraphVisualization';
 
 interface Note {
   id: string;
@@ -46,19 +48,22 @@ export const KnowledgeGraph = () => {
   const [links, setLinks] = useState<Link[]>([]);
   const [lacunae, setLacunae] = useState<Lacuna[]>([]);
   const [bridges, setBridges] = useState<Bridge[]>([]);
+  const [tags, setTags] = useState<any[]>([]);
+  const [noteTags, setNoteTags] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
 
   useEffect(() => {
     loadGraphData();
   }, []);
 
   useEffect(() => {
-    if (notes.length > 0 && canvasRef.current) {
+    if (viewMode === '2d' && notes.length > 0 && canvasRef.current) {
       renderGraph();
     }
-  }, [notes, links, selectedNode]);
+  }, [notes, links, selectedNode, viewMode]);
 
   const loadGraphData = async () => {
     setIsLoading(true);
@@ -66,17 +71,21 @@ export const KnowledgeGraph = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [notesRes, linksRes, lacunaeRes, bridgesRes] = await Promise.all([
-        supabase.from('notes').select('id, title, void_resonance_score').eq('user_id', user.id),
+      const [notesRes, linksRes, lacunaeRes, bridgesRes, tagsRes, noteTagsRes] = await Promise.all([
+        supabase.from('notes').select('id, title, void_resonance_score, detected_concepts').eq('user_id', user.id),
         supabase.from('note_concept_links').select('*').eq('user_id', user.id),
         supabase.from('conceptual_lacunae').select('*').eq('user_id', user.id).order('priority_score', { ascending: false }),
-        supabase.from('cross_tradition_bridges').select('*').eq('user_id', user.id).order('resonance_score', { ascending: false })
+        supabase.from('cross_tradition_bridges').select('*').eq('user_id', user.id).order('resonance_score', { ascending: false }),
+        supabase.from('tags').select('*').eq('user_id', user.id),
+        supabase.from('note_tags').select('*')
       ]);
 
       if (notesRes.data) setNotes(notesRes.data);
       if (linksRes.data) setLinks(linksRes.data);
       if (lacunaeRes.data) setLacunae(lacunaeRes.data);
       if (bridgesRes.data) setBridges(bridgesRes.data);
+      if (tagsRes.data) setTags(tagsRes.data);
+      if (noteTagsRes.data) setNoteTags(noteTagsRes.data);
     } catch (error) {
       console.error('Error loading graph data:', error);
       toast({
@@ -209,16 +218,51 @@ export const KnowledgeGraph = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Graph Visualization */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Network className="h-5 w-5 mr-2" />
-              Conceptual Network
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as '3d' | '2d')} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+          <TabsTrigger value="3d">3D Interactive Graph</TabsTrigger>
+          <TabsTrigger value="2d">2D Network View</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="3d" className="space-y-6">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Network className="h-5 w-5 mr-2" />
+                3D Knowledge Graph
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-96">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : notes.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-96 text-muted-foreground">
+                  <Network className="h-16 w-16 mb-4 opacity-50" />
+                  <p>No notes yet. Create some notes to build your knowledge graph.</p>
+                </div>
+              ) : (
+                <ForceGraphVisualization
+                  notes={notes}
+                  conceptLinks={links}
+                  tags={tags}
+                  noteTags={noteTags}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="2d" className="space-y-6">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Network className="h-5 w-5 mr-2" />
+                2D Conceptual Network
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center h-96">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -257,9 +301,12 @@ export const KnowledgeGraph = () => {
             </div>
           </CardContent>
         </Card>
+        </TabsContent>
+      </Tabs>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         {/* Insights Panel */}
-        <div className="space-y-6">
+        <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Conceptual Lacunae */}
           <Card>
             <CardHeader>
