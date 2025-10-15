@@ -77,86 +77,86 @@ function AppContent() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Index />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/notes"
-          element={
-            <ProtectedRoute>
-              <Notes />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/philosophy-lab"
-          element={
-            <ProtectedRoute>
-              <PhilosophyLab />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nihilism"
-          element={
-            <ProtectedRoute>
-              <Nihilism />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nihiltheism"
-          element={
-            <ProtectedRoute>
-              <Nihiltheism />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/analysis"
-          element={
-            <ProtectedRoute>
-              <Analysis />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/prompt-forge"
-          element={
-            <ProtectedRoute>
-              <PromptForge />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/knowledge-atlas"
-          element={
-            <ProtectedRoute>
-              <KnowledgeAtlas />
-            </ProtectedRoute>
-          }
-        />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/auth" element={<Auth />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notes"
+        element={
+          <ProtectedRoute>
+            <Notes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/philosophy-lab"
+        element={
+          <ProtectedRoute>
+            <PhilosophyLab />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/nihilism"
+        element={
+          <ProtectedRoute>
+            <Nihilism />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/nihiltheism"
+        element={
+          <ProtectedRoute>
+            <Nihiltheism />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analysis"
+        element={
+          <ProtectedRoute>
+            <Analysis />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/prompt-forge"
+        element={
+          <ProtectedRoute>
+            <PromptForge />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/knowledge-atlas"
+        element={
+          <ProtectedRoute>
+            <KnowledgeAtlas />
+          </ProtectedRoute>
+        }
+      />
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppContent />
+      <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <AppContent />
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
