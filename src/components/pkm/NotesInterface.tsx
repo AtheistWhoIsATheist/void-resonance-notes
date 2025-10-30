@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { nihiltheismFramework, Note } from '@/lib/nihiltheism-framework';
 import { toast } from '@/hooks/use-toast';
+import { BulkImport } from './BulkImport';
 
 export const NotesInterface = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -203,6 +204,9 @@ export const NotesInterface = () => {
               New Note
             </Button>
           </div>
+
+          {/* Bulk Import */}
+          <BulkImport />
 
           {/* Search and Filter */}
           <div className="space-y-3">

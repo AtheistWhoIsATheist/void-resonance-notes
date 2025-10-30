@@ -1,21 +1,39 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
-  BookOpen, 
-  Brain, 
-  Search, 
-  FileQuestion, 
+  BookOpen,
+  Brain,
+  Search,
+  FileQuestion,
   Lightbulb,
   Infinity,
+ codex/update-ui-layout-and-features
   Hammer
+=======
+  Sparkles,
+  User,
+  LogOut,
+  Settings,
+  Network
+  main
 } from 'lucide-react';
 
 export const Navigation = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const primaryRoutes = [
     { path: '/notes', label: 'Notes', icon: BookOpen, accent: true },
     { path: '/philosophy-lab', label: 'Philosophy Lab', icon: Brain, accent: true },
+    { path: '/knowledge-atlas', label: 'Knowledge Atlas', icon: Network, accent: true },
+    { path: '/prompt-forge', label: 'Prompt Forge', icon: Sparkles, accent: true },
   ];
 
   const secondaryRoutes = [
@@ -83,6 +101,33 @@ export const Navigation = () => {
                 </Button>
               );
             })}
+            
+            {/* User Menu */}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="ml-2">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>
+                    <User className="mr-2 h-4 w-4" />
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
