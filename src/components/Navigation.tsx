@@ -14,11 +14,15 @@ import {
   FileQuestion,
   Lightbulb,
   Infinity,
+ codex/update-ui-layout-and-features
+  Hammer
+=======
   Sparkles,
   User,
   LogOut,
   Settings,
   Network
+  main
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -36,6 +40,7 @@ export const Navigation = () => {
     { path: '/nihilism', label: 'Nihilism', icon: Search },
     { path: '/nihiltheism', label: 'Nihiltheism', icon: Lightbulb },
     { path: '/analysis', label: 'Analysis', icon: FileQuestion },
+    { path: '/prompt-forge', label: 'Prompt Forge', icon: Hammer },
   ];
 
   const isActive = (path: string) => location.pathname === path;
