@@ -14,7 +14,6 @@ import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
 import PromptForge from "./pages/PromptForge";
 import NotFound from "./pages/NotFound";
-import PromptForge from "./pages/PromptForge";
 import Auth from "./pages/Auth";
 import MigrationPrompt from "./components/MigrationPrompt";
 import { Loader2 } from "lucide-react";
@@ -154,23 +153,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
- codex/update-ui-layout-and-features
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/notes" element={<Notes />} />
-          <Route path="/philosophy-lab" element={<PhilosophyLab />} />
-          <Route path="/nihilism" element={<Nihilism />} />
-          <Route path="/nihiltheism" element={<Nihiltheism />} />
-          <Route path="/analysis" element={<Analysis />} />
-          <Route path="/prompt-forge" element={<PromptForge />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-
         <Toaster />
         <Sonner />
         <AppContent />
- main
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

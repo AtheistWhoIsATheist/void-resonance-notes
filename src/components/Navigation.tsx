@@ -14,15 +14,12 @@ import {
   FileQuestion,
   Lightbulb,
   Infinity,
- codex/update-ui-layout-and-features
-  Hammer
-=======
   Sparkles,
   User,
   LogOut,
   Settings,
-  Network
-  main
+  Network,
+  Hammer
 } from 'lucide-react';
 
 export const Navigation = () => {
