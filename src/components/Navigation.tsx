@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
-  BookOpen, 
-  Brain, 
-  Search, 
-  FileQuestion, 
+  BookOpen,
+  Brain,
+  Search,
+  FileQuestion,
   Lightbulb,
-  Infinity
+  Infinity,
+  Sparkles
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -15,6 +16,7 @@ export const Navigation = () => {
   const primaryRoutes = [
     { path: '/notes', label: 'Notes', icon: BookOpen, accent: true },
     { path: '/philosophy-lab', label: 'Philosophy Lab', icon: Brain, accent: true },
+    { path: '/prompt-forge', label: 'Prompt Forge', icon: Sparkles, accent: true },
   ];
 
   const secondaryRoutes = [
