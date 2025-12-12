@@ -13,6 +13,7 @@ import Nihilism from "./pages/Nihilism";
 import Nihiltheism from "./pages/Nihiltheism";
 import Analysis from "./pages/Analysis";
 import PromptForge from "./pages/PromptForge";
+import UncEnginePage from "./pages/UncEngine";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import MigrationPrompt from "./components/MigrationPrompt";
@@ -140,6 +141,14 @@ function AppContent() {
         element={
           <ProtectedRoute>
             <KnowledgeAtlas />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/unc-engine"
+        element={
+          <ProtectedRoute>
+            <UncEnginePage />
           </ProtectedRoute>
         }
       />
