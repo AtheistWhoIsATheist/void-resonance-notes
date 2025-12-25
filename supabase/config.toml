@@ -1,0 +1,19 @@
+project_id = "iqyfflytgtyjfnedlmpz"
+
+[functions.ai-chat]
+verify_jwt = true
+
+[functions.semantic-search]
+verify_jwt = true
+
+[functions.generate-embeddings]
+verify_jwt = true
+
+[functions.summarize-collection]
+verify_jwt = true
+
+[functions.bulk-import]
+verify_jwt = true
+
+[functions.maintain-knowledge-graph]
+verify_jwt = true

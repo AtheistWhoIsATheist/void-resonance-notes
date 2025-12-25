@@ -1,6 +1,8 @@
 import {
+ codex/define-loveable-core-tenets-and-data-model
   DensificationCycle,
   DensificationSlice,
+ main
   PFCollection,
   PFConstraint,
   PFEnhancementProfile,
@@ -324,6 +326,7 @@ export const promptForgeAcceptanceTests = [
   "Scores render (0–100) with NT Alignment included.",
 ];
 
+ codex/define-loveable-core-tenets-and-data-model
 export const densificationSlices: DensificationSlice[] = [
   {
     id: "core-tenets",
@@ -430,6 +433,8 @@ export const densificationCycles: DensificationCycle[] = [
   },
 ];
 
+=======
+  main
 export type EnhancementRunResult = Pick<
   PFRecord,
   "output" | "trace" | "scores" | "version" | "tags"
