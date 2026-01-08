@@ -114,3 +114,20 @@ export interface PFSettings {
   };
   keyboard: Record<string, string>;
 }
+ codex/define-loveable-core-tenets-and-data-model
+
+export interface DensificationSlice {
+  id: string;
+  title: string;
+  detail: string;
+  bullets: string[];
+}
+
+export interface DensificationCycle {
+  id: string;
+  focus: string;
+  assurance: string;
+  artifacts: string[];
+}
+
+ main

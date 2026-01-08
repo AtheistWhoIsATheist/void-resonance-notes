@@ -2,6 +2,10 @@ import { useMemo, useState } from "react";
 import {
   deterministicHash,
   generateDeterministicRun,
+ codex/define-loveable-core-tenets-and-data-model
+  densificationCycles,
+  densificationSlices,
+ main
   pecOmega,
   professorNihilLedger,
   promptForgeAcceptanceTests,
@@ -78,7 +82,10 @@ const formatDate = (iso: string) =>
 
 const PromptForge = () => {
   const [search, setSearch] = useState("");
+ codex/define-loveable-core-tenets-and-data-model
+  const [domainFilter, setDomainFilter] = useState<string | "all">("all");
   const [domainFilter, setDomainFilter] = useState<"all" | "code" | "creative" | "journal314" | "nihiltheism" | "philosophy" | "ren" | "research" | "tech">("all");
+ main
   const [minScore, setMinScore] = useState(0);
   const [selectedCollection, setSelectedCollection] = useState(promptForgeCollections[0].id);
   const [selectedPromptId, setSelectedPromptId] = useState(promptForgePrompts[0]?.id ?? "");
@@ -713,6 +720,67 @@ const PromptForge = () => {
                 <Card className="border-slate-900 bg-slate-950/80">
                   <CardHeader className="border-b border-slate-900/60 pb-4">
                     <CardTitle className="flex items-center gap-2 text-sm text-slate-100">
+ codex/define-loveable-core-tenets-and-data-model
+                      <Repeat2 className="h-4 w-4 text-cyan-400" /> Densification Protocol
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 pt-4 text-xs text-slate-300">
+                    <div className="rounded-md border border-slate-900/70 bg-slate-950/90 p-3">
+                      <div className="flex items-center justify-between text-[11px] uppercase tracking-wide text-slate-400">
+                        <span>Recursive Saturation</span>
+                        <span className="text-cyan-300">100% locked</span>
+                      </div>
+                      <Progress value={100} className="mt-2 h-2 bg-slate-900" />
+                      <p className="mt-2 text-slate-200">Iterative sweeps run until no further material remains to densify.</p>
+                    </div>
+                    <div className="grid gap-3 rounded-md border border-slate-900/70 bg-slate-950/90 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cycles</p>
+                      {densificationCycles.map((cycle) => (
+                        <div key={cycle.id} className="rounded-md border border-slate-900 bg-slate-950/70 p-3">
+                          <div className="flex items-center justify-between text-[11px] uppercase tracking-wide text-slate-400">
+                            <span>{cycle.focus}</span>
+                            <span className="text-cyan-300">{cycle.id}</span>
+                          </div>
+                          <p className="mt-1 text-slate-200">{cycle.assurance}</p>
+                          <ul className="mt-2 space-y-1 text-slate-300">
+                            {cycle.artifacts.map((item) => (
+                              <li key={item} className="flex items-start gap-2">
+                                <CheckCircle2 className="mt-0.5 h-3 w-3 text-emerald-400" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid gap-3 rounded-md border border-slate-900/70 bg-slate-950/90 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Slices</p>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {densificationSlices.map((slice) => (
+                          <div key={slice.id} className="rounded-md border border-slate-900 bg-slate-950/70 p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{slice.title}</p>
+                            <p className="mt-1 text-slate-200">{slice.detail}</p>
+                            <ul className="mt-2 space-y-1 text-slate-300">
+                              {slice.bullets.map((bullet) => (
+                                <li key={bullet} className="flex items-start gap-2">
+                                  <Sparkles className="mt-0.5 h-3 w-3 text-cyan-300" />
+                                  <span>{bullet}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              <section>
+                <Card className="border-slate-900 bg-slate-950/80">
+                  <CardHeader className="border-b border-slate-900/60 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-sm text-slate-100">
+ main
                       <Flame className="h-4 w-4 text-cyan-400" /> Constraint Matrix
                     </CardTitle>
                   </CardHeader>

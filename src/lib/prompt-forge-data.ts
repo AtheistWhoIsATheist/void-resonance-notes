@@ -1,4 +1,8 @@
 import {
+ codex/define-loveable-core-tenets-and-data-model
+  DensificationCycle,
+  DensificationSlice,
+ main
   PFCollection,
   PFConstraint,
   PFEnhancementProfile,
@@ -322,6 +326,115 @@ export const promptForgeAcceptanceTests = [
   "Scores render (0–100) with NT Alignment included.",
 ];
 
+ codex/define-loveable-core-tenets-and-data-model
+export const densificationSlices: DensificationSlice[] = [
+  {
+    id: "core-tenets",
+    title: "Core Tenets Locked",
+    detail: "Single-user, local-first posture enforced with deterministic manifests and zero sharing surfaces.",
+    bullets: [
+      "Collaboration surfaces removed; only local execution paths remain visible.",
+      "IndexedDB snapshot noted as primary persistence with optional export/import bundles.",
+      "Deterministic manifest hashes rendered to anchor re-runs.",
+    ],
+  },
+  {
+    id: "data-model",
+    title: "Data Model Saturation",
+    detail: "Prompts, profiles, constraints, router rules, and scoring weights are visible and parameterized.",
+    bullets: [
+      "Profile pipelines list step kinds, temperatures, and token budgets for auditing.",
+      "Constraints enumerate enforcement modes (critic, hard-trim, regex-guard).",
+      "Scoring rubric exposes NT Alignment alongside clarity, specificity, and structure.",
+    ],
+  },
+  {
+    id: "automation",
+    title: "Automation Surfaces",
+    detail: "Watch folders, scheduled jobs, and template chains surfaced with toggles and descriptive guardrails.",
+    bullets: [
+      "Batch, schedule, and watch folders present with latency expectations (≤5s).",
+      "Template chains framed as sequential deterministic runs for reproducibility.",
+      "Clipboard/export affordances mapped to deterministic bundle outputs.",
+    ],
+  },
+  {
+    id: "security",
+    title: "Security Envelope",
+    detail: "Encryption, passphrase state, API key vault, and sync targets listed for manual verification.",
+    bullets: [
+      "AES-GCM vault noted as on-device; passphrase requirement surfaced.",
+      "Drive + Obsidian sync paths disclosed with deduplication note.",
+      "Keyboard shortcuts documented to avoid hidden automation triggers.",
+    ],
+  },
+  {
+    id: "acceptance",
+    title: "Acceptance Alignment",
+    detail: "Each acceptance test mirrored in UI copy to demonstrate coverage pathways.",
+    bullets: [
+      "Ledger JSONL emission paired with on-demand copy and fidelity guard message.",
+      "Obsidian export, batch handling, and score rendering described in dedicated cards.",
+      "Deterministic rerun guarantee tied to manifest hash display.",
+    ],
+  },
+  {
+    id: "determinism",
+    title: "Determinism Instrumentation",
+    detail: "Hashing utility and trace payloads echo the manifest to enforce saturation at 100%.",
+    bullets: [
+      "Trace includes per-step tokens, duration, and routed model for forensic replay.",
+      "Diff tab highlights hash plus original/enhanced payload pairing.",
+      "Record JSON export matches on-screen manifest values for bundle parity.",
+    ],
+  },
+];
+
+export const densificationCycles: DensificationCycle[] = [
+  {
+    id: "cycle-1",
+    focus: "Entity Survey",
+    assurance: "Prompts, profiles, constraints, router rules, and settings all visible in a single pass.",
+    artifacts: [
+      "Prompt metadata grid with created/updated/source fields.",
+      "Pipeline router card listing token budgets and routed models.",
+      "Constraint matrix comparing enforcement style per profile.",
+    ],
+  },
+  {
+    id: "cycle-2",
+    focus: "Process Fidelity",
+    assurance: "Trace, ledger, and scoring outputs co-present to cross-check deterministic reruns.",
+    artifacts: [
+      "Trace tab with input/output pairs for each step.",
+      "Ledger tab with JSONL emission preview and guard copy.",
+      "Scores tab showing rubric weights, total, and narrative notes.",
+    ],
+  },
+  {
+    id: "cycle-3",
+    focus: "Automation + Export",
+    assurance: "Automation toggles, export cards, and manifest hash anchored to import/export pathways.",
+    artifacts: [
+      "Watch folder, template chain, and schedule toggles annotated with behavior promises.",
+      "Import/export card describing Markdown, JSON trace, and bundle formats.",
+      "Manifest hash banner in header and Diff tab deterministic guarantee callout.",
+    ],
+  },
+  {
+    id: "cycle-4",
+    focus: "Security & Isolation",
+    assurance: "Local-first safeguards detailed with vault state, sync destinations, and key visibility.",
+    artifacts: [
+      "Security card enumerating AES-GCM and passphrase flags.",
+      "API key listings per model plus sync toggles with deduplication note.",
+      "Keyboard shortcut map to avoid hidden collaboration surfaces.",
+    ],
+  },
+];
+
+=======
+  main
 export type EnhancementRunResult = Pick<
   PFRecord,
   "output" | "trace" | "scores" | "version" | "tags"
