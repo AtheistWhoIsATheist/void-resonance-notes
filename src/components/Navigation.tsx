@@ -1,51 +1,46 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { 
+} from "@/components/ui/dropdown-menu";
+import {
   BookOpen,
   Brain,
   Search,
   FileQuestion,
   Lightbulb,
   Infinity,
- codex/define-loveable-core-tenets-and-data-model
-  Sparkles
-
   Sparkles,
   BrainCircuit,
   User,
   LogOut,
   Settings,
   Network,
-  Hammer
- main
-} from 'lucide-react';
+  Hammer,
+} from "lucide-react";
 
 export const Navigation = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
 
   const primaryRoutes = [
-    { path: '/notes', label: 'Notes', icon: BookOpen, accent: true },
-    { path: '/philosophy-lab', label: 'Philosophy Lab', icon: Brain, accent: true }, codex/define-loveable-core-tenets-and-data-model
-
-    { path: '/unc-engine', label: 'UNC Engine', icon: BrainCircuit, accent: true },
-    { path: '/knowledge-atlas', label: 'Knowledge Atlas', icon: Network, accent: true },
- main
-    { path: '/prompt-forge', label: 'Prompt Forge', icon: Sparkles, accent: true },
+    { path: "/notes", label: "Notes", icon: BookOpen, accent: true },
+    { path: "/philosophy-lab", label: "Philosophy Lab", icon: Brain, accent: true },
+    { path: "/unc-engine", label: "UNC Engine", icon: BrainCircuit, accent: true },
+    { path: "/knowledge-atlas", label: "Knowledge Atlas", icon: Network, accent: true },
+    { path: "/prompt-forge", label: "Prompt Forge", icon: Sparkles, accent: true },
   ];
 
   const secondaryRoutes = [
-    { path: '/nihilism', label: 'Nihilism', icon: Search },
-    { path: '/nihiltheism', label: 'Nihiltheism', icon: Lightbulb },
-    { path: '/analysis', label: 'Analysis', icon: FileQuestion },
-    { path: '/prompt-forge', label: 'Prompt Forge', icon: Hammer },
+    { path: "/nihilism", label: "Nihilism", icon: Search },
+    { path: "/nihiltheism", label: "Nihiltheism", icon: Lightbulb },
+    { path: "/nihiltheism-engine", label: "NKE", icon: BrainCircuit },
+    { path: "/analysis", label: "Analysis", icon: FileQuestion },
+    { path: "/prompt-forge", label: "Prompt Forge", icon: Hammer },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -54,16 +49,14 @@ export const Navigation = () => {
     <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="flex items-center space-x-2 text-foreground hover:text-primary transition-swift group"
           >
             <Infinity className="h-6 w-6 text-resonance group-hover:rotate-180 transition-all duration-500" />
             <span className="font-semibold text-lg">Infinity Notes</span>
           </Link>
 
-          {/* Primary Navigation */}
           <div className="flex items-center space-x-2">
             {primaryRoutes.map((route) => {
               const Icon = route.icon;
@@ -73,9 +66,7 @@ export const Navigation = () => {
                   asChild
                   variant={isActive(route.path) ? "default" : "ghost"}
                   className={`transition-contemplative ${
-                    route.accent 
-                      ? 'hover:bg-primary/10 hover:text-primary' 
-                      : 'hover:bg-muted'
+                    route.accent ? "hover:bg-primary/10 hover:text-primary" : "hover:bg-muted"
                   }`}
                 >
                   <Link to={route.path}>
@@ -87,7 +78,6 @@ export const Navigation = () => {
             })}
           </div>
 
-          {/* Secondary Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {secondaryRoutes.map((route) => {
               const Icon = route.icon;
@@ -106,8 +96,7 @@ export const Navigation = () => {
                 </Button>
               );
             })}
-            
-            {/* User Menu */}
+
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
