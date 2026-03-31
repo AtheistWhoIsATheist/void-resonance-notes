@@ -1,0 +1,93 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ClaimStatus {
+  PROPOSED
+  VERIFIED
+  CONTRADICTED
+}
+
+enum GapStatus {
+  OPEN
+  RESEARCHING
+  RESOLVED
+}
+
+enum LinkType {
+  SUPPORTS
+  CONTRADICTS
+  EVOLVES
+}
+
+model Project {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  documents   Document[]
+  notes       Note[]
+  gaps        Gap[]
+  createdAt   DateTime   @default(now())
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  summary   String?
+  type      String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  chunks    Chunk[]
+  metadata  Json
+}
+
+model Chunk {
+  id         String                 @id @default(cuid())
+  content    String
+  embedding  Unsupported("vector")?
+  documentId String
+  document   Document               @relation(fields: [documentId], references: [id])
+}
+
+model Note {
+  id        String  @id @default(cuid())
+  title     String
+  body      String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  claims    Claim[]
+  links     Link[]  @relation("SourceNote")
+  backlinks Link[]  @relation("TargetNote")
+}
+
+model Claim {
+  id        String      @id @default(cuid())
+  statement String
+  status    ClaimStatus
+  noteId    String
+  note      Note        @relation(fields: [noteId], references: [id])
+}
+
+model Gap {
+  id        String    @id @default(cuid())
+  title     String
+  reasoning String
+  status    GapStatus
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id])
+}
+
+model Link {
+  id       String   @id @default(cuid())
+  sourceId String
+  targetId String
+  type     LinkType
+  source   Note     @relation("SourceNote", fields: [sourceId], references: [id])
+  target   Note     @relation("TargetNote", fields: [targetId], references: [id])
+}
