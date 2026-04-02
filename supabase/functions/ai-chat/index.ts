@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, model = 'google/gemini-2.5-flash', includeContext = false } = await req.json();
+    const { messages, model = 'google/gemini-2.5-flash', includeContext = false, systemPrompt: customSystemPrompt } = await req.json();
     
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
@@ -24,7 +24,7 @@ serve(async (req) => {
     }
 
     // Build system prompt with optional context
-    let systemPrompt = 'You are a philosophical AI assistant specializing in nihilism, existentialism, and void-resonance theory. Provide thoughtful, nuanced insights.';
+    let systemPrompt = customSystemPrompt || 'You are a philosophical AI assistant specializing in nihilism, existentialism, and void-resonance theory. Provide thoughtful, nuanced insights.';
     
     if (includeContext) {
       const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
