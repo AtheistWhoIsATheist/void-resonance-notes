@@ -100,7 +100,7 @@ export const Navigation = () => {
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="ml-2">
+                  <Button variant="ghost" size="sm" className="ml-2" aria-label="User menu">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
