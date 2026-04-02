@@ -301,6 +301,7 @@ export const NotesInterface = () => {
                             startEditing(note);
                           }}
                           className="h-6 w-6 p-0"
+                          aria-label="Edit note"
                         >
                           <Edit3 className="h-3 w-3" />
                         </Button>
@@ -312,6 +313,7 @@ export const NotesInterface = () => {
                             deleteNote(note.id);
                           }}
                           className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          aria-label="Delete note"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
