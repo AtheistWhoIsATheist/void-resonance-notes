@@ -33,6 +33,15 @@ type ChatMessage = {
   createdAt: string;
 };
 
+type ChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+  error?: string;
+};
+
 type ChatThread = {
   id: string;
   title: string;
@@ -46,6 +55,7 @@ type ChatThread = {
 
 const THREAD_STORAGE_KEY = "nihiltheism-ultra-chat-threads";
 const ACTIVE_THREAD_STORAGE_KEY = "nihiltheism-ultra-chat-active-thread";
+const MAX_MESSAGES_PER_THREAD = 60;
 
 const AVAILABLE_MODELS = [
   "google/gemini-2.5-flash",
@@ -83,6 +93,34 @@ const createNewThread = (): ChatThread => {
 
 const estimateTokens = (text: string) => Math.ceil(text.trim().length / 4);
 
+const ensureThreadShape = (raw: unknown): ChatThread | null => {
+  if (!raw || typeof raw !== "object") return null;
+  const candidate = raw as Partial<ChatThread>;
+  if (!candidate.id || !Array.isArray(candidate.messages)) return null;
+  return {
+    id: candidate.id,
+    title: candidate.title || "Untitled Session",
+    createdAt: candidate.createdAt || new Date().toISOString(),
+    updatedAt: candidate.updatedAt || new Date().toISOString(),
+    model: AVAILABLE_MODELS.includes(candidate.model || "") ? (candidate.model as string) : AVAILABLE_MODELS[0],
+    includeContext: Boolean(candidate.includeContext),
+    systemPrompt: candidate.systemPrompt || DEFAULT_SYSTEM_PROMPT,
+    messages: candidate.messages
+      .filter((message): message is ChatMessage =>
+        Boolean(
+          message &&
+            typeof message === "object" &&
+            "id" in message &&
+            "content" in message &&
+            "role" in message &&
+            (message as ChatMessage).role &&
+            ["user", "assistant", "system"].includes((message as ChatMessage).role),
+        ),
+      )
+      .slice(-MAX_MESSAGES_PER_THREAD),
+  };
+};
+
 export default function NihiltheismEngine() {
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string>("");
@@ -102,7 +140,16 @@ export default function NihiltheismEngine() {
       return;
     }
 
-    const parsedThreads: ChatThread[] = JSON.parse(savedThreads);
+    let parsedThreads: ChatThread[] = [];
+    try {
+      const raw = JSON.parse(savedThreads);
+      parsedThreads = Array.isArray(raw)
+        ? raw.map(ensureThreadShape).filter((thread): thread is ChatThread => Boolean(thread))
+        : [];
+    } catch {
+      parsedThreads = [];
+    }
+
     if (!parsedThreads.length) {
       const starterThread = createNewThread();
       setThreads([starterThread]);
@@ -164,6 +211,7 @@ export default function NihiltheismEngine() {
   const sendMessage = async (overridePrompt?: string) => {
     if (!activeThread || isSending) return;
 
+    const targetThreadId = activeThread.id;
     const userText = (overridePrompt ?? input).trim();
     if (!userText) return;
 
@@ -174,7 +222,7 @@ export default function NihiltheismEngine() {
       createdAt: new Date().toISOString(),
     };
 
-    const optimisticMessages = [...activeThread.messages, userMessage];
+    const optimisticMessages = [...activeThread.messages, userMessage].slice(-MAX_MESSAGES_PER_THREAD);
     updateActiveThread((thread) => ({
       ...thread,
       title: thread.messages.length <= 1 ? userText.slice(0, 48) : thread.title,
@@ -190,7 +238,7 @@ export default function NihiltheismEngine() {
         .filter((message) => message.role !== "system")
         .map((message) => ({ role: message.role, content: message.content }));
 
-      const { data, error } = await supabase.functions.invoke("ai-chat", {
+      const { data, error } = await supabase.functions.invoke<ChatCompletionResponse>("ai-chat", {
         body: {
           messages: payloadMessages,
           model: activeThread.model,
@@ -205,6 +253,7 @@ export default function NihiltheismEngine() {
 
       const assistantContent =
         data?.choices?.[0]?.message?.content ??
+        data?.error ??
         "No response payload received. Please check your model credentials and edge function logs.";
 
       const assistantMessage: ChatMessage = {
@@ -214,13 +263,38 @@ export default function NihiltheismEngine() {
         createdAt: new Date().toISOString(),
       };
 
-      updateActiveThread((thread) => ({
-        ...thread,
-        updatedAt: new Date().toISOString(),
-        messages: [...thread.messages, assistantMessage],
-      }));
+      setThreads((prev) =>
+        prev.map((thread) =>
+          thread.id === targetThreadId
+            ? {
+                ...thread,
+                updatedAt: new Date().toISOString(),
+                messages: [...thread.messages, assistantMessage].slice(-MAX_MESSAGES_PER_THREAD),
+              }
+            : thread,
+        ),
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown chat error";
+      setThreads((prev) =>
+        prev.map((thread) =>
+          thread.id === targetThreadId
+            ? {
+                ...thread,
+                updatedAt: new Date().toISOString(),
+                messages: [
+                  ...thread.messages,
+                  {
+                    id: createId(),
+                    role: "assistant",
+                    content: `⚠️ Send failed: ${message}`,
+                    createdAt: new Date().toISOString(),
+                  },
+                ].slice(-MAX_MESSAGES_PER_THREAD),
+              }
+            : thread,
+        ),
+      );
       toast({
         title: "Send failed",
         description: message,
@@ -242,7 +316,9 @@ export default function NihiltheismEngine() {
 
     updateActiveThread((thread) => ({
       ...thread,
-      messages: thread.messages.filter((message) => message.role !== "assistant" || message.id !== thread.messages.at(-1)?.id),
+      messages: thread.messages.filter(
+        (message) => message.role !== "assistant" || message.id !== thread.messages.at(-1)?.id,
+      ),
     }));
 
     await sendMessage(lastUserMessage.content);

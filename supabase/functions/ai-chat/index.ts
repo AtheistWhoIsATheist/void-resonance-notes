@@ -5,13 +5,49 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const ALLOWED_ROLES = new Set(["user", "assistant"]);
+const MAX_MESSAGES = 40;
+const MAX_MESSAGE_CHARS = 12_000;
+const MAX_SYSTEM_PROMPT_CHARS = 8_000;
+
+type IncomingMessage = {
+  role?: string;
+  content?: string;
+};
+
+const normalizeMessages = (messages: unknown): Array<{ role: string; content: string }> => {
+  if (!Array.isArray(messages)) return [];
+
+  return messages
+    .filter((item): item is IncomingMessage => Boolean(item && typeof item === "object"))
+    .map((item) => ({
+      role: ALLOWED_ROLES.has(item.role ?? "") ? (item.role as string) : "user",
+      content: typeof item.content === "string" ? item.content.trim().slice(0, MAX_MESSAGE_CHARS) : "",
+    }))
+    .filter((item) => item.content.length > 0)
+    .slice(-MAX_MESSAGES);
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, model = 'google/gemini-2.5-flash', includeContext = false, systemPrompt: customSystemPrompt } = await req.json();
+    const {
+      messages,
+      model = 'google/gemini-2.5-flash',
+      includeContext = false,
+      systemPrompt: customSystemPrompt,
+    } = await req.json();
+    const safeMessages = normalizeMessages(messages);
+
+    if (!safeMessages.length) {
+      return new Response(
+        JSON.stringify({ error: 'No valid messages were provided.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
@@ -24,7 +60,9 @@ serve(async (req) => {
     }
 
     // Build system prompt with optional context
-    let systemPrompt = customSystemPrompt || 'You are a philosophical AI assistant specializing in nihilism, existentialism, and void-resonance theory. Provide thoughtful, nuanced insights.';
+    let systemPrompt = (typeof customSystemPrompt === 'string' ? customSystemPrompt : '') ||
+      'You are a philosophical AI assistant specializing in nihilism, existentialism, and void-resonance theory. Provide thoughtful, nuanced insights.';
+    systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
     
     if (includeContext) {
       const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
@@ -54,6 +92,7 @@ serve(async (req) => {
           ).join('\n');
           
           systemPrompt += `\n\nYou have access to the user's recent philosophical notes:\n${notesContext}\n\nUse this context to provide more personalized and contextually relevant responses.`;
+          systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
         }
 
         // Fetch user's tags for additional context
@@ -66,6 +105,7 @@ serve(async (req) => {
         if (!tagsError && tags && tags.length > 0) {
           const tagsContext = tags.map(tag => tag.name).join(', ');
           systemPrompt += `\n\nUser's philosophical interests/tags: ${tagsContext}`;
+          systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
         }
       }
     }
@@ -80,7 +120,7 @@ serve(async (req) => {
         model,
         messages: [
           { role: 'system', content: systemPrompt },
-          ...messages,
+          ...safeMessages,
         ],
         stream: false,
       }),
