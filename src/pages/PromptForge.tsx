@@ -2,10 +2,8 @@ import { useMemo, useState } from "react";
 import {
   deterministicHash,
   generateDeterministicRun,
- codex/define-loveable-core-tenets-and-data-model
   densificationCycles,
   densificationSlices,
- main
   pecOmega,
   professorNihilLedger,
   promptForgeAcceptanceTests,
@@ -82,10 +80,7 @@ const formatDate = (iso: string) =>
 
 const PromptForge = () => {
   const [search, setSearch] = useState("");
- codex/define-loveable-core-tenets-and-data-model
-  const [domainFilter, setDomainFilter] = useState<string | "all">("all");
   const [domainFilter, setDomainFilter] = useState<"all" | "code" | "creative" | "journal314" | "nihiltheism" | "philosophy" | "ren" | "research" | "tech">("all");
- main
   const [minScore, setMinScore] = useState(0);
   const [selectedCollection, setSelectedCollection] = useState(promptForgeCollections[0].id);
   const [selectedPromptId, setSelectedPromptId] = useState(promptForgePrompts[0]?.id ?? "");
@@ -720,7 +715,6 @@ const PromptForge = () => {
                 <Card className="border-slate-900 bg-slate-950/80">
                   <CardHeader className="border-b border-slate-900/60 pb-4">
                     <CardTitle className="flex items-center gap-2 text-sm text-slate-100">
- codex/define-loveable-core-tenets-and-data-model
                       <Repeat2 className="h-4 w-4 text-cyan-400" /> Densification Protocol
                     </CardTitle>
                   </CardHeader>
@@ -780,7 +774,6 @@ const PromptForge = () => {
                 <Card className="border-slate-900 bg-slate-950/80">
                   <CardHeader className="border-b border-slate-900/60 pb-4">
                     <CardTitle className="flex items-center gap-2 text-sm text-slate-100">
- main
                       <Flame className="h-4 w-4 text-cyan-400" /> Constraint Matrix
                     </CardTitle>
                   </CardHeader>
