@@ -1,8 +1,6 @@
 import {
- codex/define-loveable-core-tenets-and-data-model
   DensificationCycle,
   DensificationSlice,
- main
   PFCollection,
   PFConstraint,
   PFEnhancementProfile,
