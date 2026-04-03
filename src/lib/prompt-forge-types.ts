@@ -114,7 +114,7 @@ export interface PFSettings {
   };
   keyboard: Record<string, string>;
 }
- codex/define-loveable-core-tenets-and-data-model
+ 
 
 export interface DensificationSlice {
   id: string;
