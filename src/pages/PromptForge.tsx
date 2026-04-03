@@ -2,10 +2,8 @@ import { useMemo, useState } from "react";
 import {
   deterministicHash,
   generateDeterministicRun,
- codex/define-loveable-core-tenets-and-data-model
   densificationCycles,
   densificationSlices,
- main
   pecOmega,
   professorNihilLedger,
   promptForgeAcceptanceTests,
