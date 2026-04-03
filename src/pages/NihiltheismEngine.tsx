@@ -286,7 +286,7 @@ export default function NihiltheismEngine() {
                   ...thread.messages,
                   {
                     id: createId(),
-                    role: "assistant",
+                    role: "assistant" as ChatRole,
                     content: `⚠️ Send failed: ${message}`,
                     createdAt: new Date().toISOString(),
                   },
