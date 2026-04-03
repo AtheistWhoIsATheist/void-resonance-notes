@@ -25,7 +25,7 @@ import {
 
 export const Navigation = () => {
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  
 
   const primaryRoutes = [
     { path: "/notes", label: "Notes", icon: BookOpen, accent: true },
