@@ -324,7 +324,7 @@ export const promptForgeAcceptanceTests = [
   "Scores render (0–100) with NT Alignment included.",
 ];
 
- codex/define-loveable-core-tenets-and-data-model
+ 
 export const densificationSlices: DensificationSlice[] = [
   {
     id: "core-tenets",

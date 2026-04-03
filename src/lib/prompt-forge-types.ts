@@ -130,4 +130,3 @@ export interface DensificationCycle {
   artifacts: string[];
 }
 
- main

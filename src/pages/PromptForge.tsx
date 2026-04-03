@@ -80,10 +80,7 @@ const formatDate = (iso: string) =>
 
 const PromptForge = () => {
   const [search, setSearch] = useState("");
- codex/define-loveable-core-tenets-and-data-model
-  const [domainFilter, setDomainFilter] = useState<string | "all">("all");
   const [domainFilter, setDomainFilter] = useState<"all" | "code" | "creative" | "journal314" | "nihiltheism" | "philosophy" | "ren" | "research" | "tech">("all");
- main
   const [minScore, setMinScore] = useState(0);
   const [selectedCollection, setSelectedCollection] = useState(promptForgeCollections[0].id);
   const [selectedPromptId, setSelectedPromptId] = useState(promptForgePrompts[0]?.id ?? "");
