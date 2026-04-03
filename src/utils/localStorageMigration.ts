@@ -59,31 +59,36 @@ export async function migrateLocalStorageToDatabase(userId: string): Promise<{
       errors.push(`Failed to create collection: ${collectionError.message}`);
     }
 
-    // Migrate each note
+    // Migrate all notes in a single bulk insert
+    const notesToInsert = [];
     for (const note of localNotes) {
+      notesToInsert.push({
+        user_id: userId,
+        collection_id: collection?.id,
+        title: note.title,
+        content: note.content,
+        source: note.source || 'local-storage',
+        detected_concepts: note.detectedConcepts || [],
+        void_resonance_score: note.voidResonanceScore || 0,
+        custom_metadata: {
+          framework: note.framework,
+          original_timestamp: note.timestamp,
+          migrated_at: new Date().toISOString(),
+        },
+      });
+    }
+
+    if (notesToInsert.length > 0) {
       try {
-        const { error } = await supabase.from('notes').insert({
-          user_id: userId,
-          collection_id: collection?.id,
-          title: note.title,
-          content: note.content,
-          source: note.source || 'local-storage',
-          detected_concepts: note.detectedConcepts || [],
-          void_resonance_score: note.voidResonanceScore || 0,
-          custom_metadata: {
-            framework: note.framework,
-            original_timestamp: note.timestamp,
-            migrated_at: new Date().toISOString(),
-          },
-        });
+        const { error } = await supabase.from('notes').insert(notesToInsert);
 
         if (error) {
-          errors.push(`Failed to migrate note "${note.title}": ${error.message}`);
+          errors.push(`Failed to bulk migrate notes: ${error.message}`);
         } else {
-          migratedCount++;
+          migratedCount = notesToInsert.length;
         }
       } catch (err: any) {
-        errors.push(`Error migrating note "${note.title}": ${err.message}`);
+        errors.push(`Error during bulk migration: ${err.message}`);
       }
     }
 
