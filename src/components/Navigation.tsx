@@ -2,12 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   BookOpen,
   Brain,
   Search,
@@ -16,9 +10,6 @@ import {
   Infinity,
   Sparkles,
   BrainCircuit,
-  User,
-  LogOut,
-  Settings,
   Network,
   Hammer,
 } from "lucide-react";
