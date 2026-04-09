@@ -9,7 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Edit3, 
   Trash2, 
   Tag,
@@ -37,8 +36,9 @@ export const NotesInterface = () => {
     loadNotes();
     
     // Listen for vault-note-added events
-    const handleVaultNoteAdded = (event: any) => {
-      const note = event.detail;
+    const handleVaultNoteAdded = (event: Event) => {
+      const note = (event as CustomEvent<Note>).detail;
+      if (!note) return;
       setNotes(prev => [note, ...prev]);
       toast({
         title: "Note Added to Vault",
@@ -51,14 +51,27 @@ export const NotesInterface = () => {
   }, []);
 
   const loadNotes = () => {
-    const savedNotes = localStorage.getItem('infinity-notes');
-    if (savedNotes) {
-      const parsedNotes = JSON.parse(savedNotes).map((note: any) => ({
+    try {
+      const savedNotes = localStorage.getItem('infinity-notes');
+      if (!savedNotes) {
+        setNotes([]);
+        return;
+      }
+
+      const parsedNotes = JSON.parse(savedNotes).map((note: Partial<Note>) => ({
         ...note,
-        createdAt: new Date(note.createdAt),
-        updatedAt: new Date(note.updatedAt),
-      }));
+        createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
+        updatedAt: note.updatedAt ? new Date(note.updatedAt) : new Date(),
+      })) as Note[];
+
       setNotes(parsedNotes);
+    } catch {
+      setNotes([]);
+      toast({
+        title: "Could not load saved notes",
+        description: "Stored notes were corrupted and have been ignored.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -167,6 +180,14 @@ export const NotesInterface = () => {
     setTags('');
   };
 
+  const startCreatingNote = () => {
+    setSelectedNote(null);
+    setTitle('');
+    setContent('');
+    setTags('');
+    setIsEditing(true);
+  };
+
   const filteredNotes = notes.filter(note => {
     const matchesSearch = !searchQuery || 
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -197,7 +218,7 @@ export const NotesInterface = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-foreground">Notes</h2>
             <Button 
-              onClick={() => setIsEditing(true)}
+              onClick={startCreatingNote}
               className="bg-primary hover:bg-primary/90"
             >
               <Plus className="h-4 w-4 mr-2" />
