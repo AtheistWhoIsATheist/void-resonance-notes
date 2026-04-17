@@ -30,27 +30,31 @@ export const BulkImport = () => {
     setResults([]);
 
     try {
-      const notes = [];
+      let completed = 0;
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      const notesPromises = Array.from(files).map(async (file) => {
         const content = await file.text();
         
         // Extract title from filename or first line
         let title = file.name.replace(/\.(txt|md|markdown)$/i, '');
         const firstLine = content.split('\n')[0];
-        if (firstLine.startsWith('#')) {
+        if (firstLine && firstLine.startsWith('#')) {
           title = firstLine.replace(/^#+\s*/, '').trim();
         }
 
-        notes.push({
+        const note = {
           title,
           content,
           filename: file.name
-        });
+        };
 
-        setProgress(((i + 1) / files.length) * 50); // First 50% for reading files
-      }
+        completed++;
+        setProgress((completed / files.length) * 50); // First 50% for reading files
+
+        return note;
+      });
+
+      const notes = await Promise.all(notesPromises);
 
       // Call bulk import edge function
       const { data, error } = await supabase.functions.invoke('bulk-import', {
