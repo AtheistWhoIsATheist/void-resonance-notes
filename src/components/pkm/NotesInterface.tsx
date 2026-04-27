@@ -19,6 +19,7 @@ import {
 import { nihiltheismFramework, Note } from '@/lib/nihiltheism-framework';
 import { toast } from '@/hooks/use-toast';
 import { BulkImport } from './BulkImport';
+import { ObsidianVaultImporter } from './ObsidianVaultImporter';
 
 export const NotesInterface = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -225,6 +226,9 @@ export const NotesInterface = () => {
               New Note
             </Button>
           </div>
+
+          {/* Obsidian Wiki Import */}
+          <ObsidianVaultImporter onImported={loadNotes} />
 
           {/* Bulk Import */}
           <BulkImport />
@@ -482,6 +486,32 @@ export const NotesInterface = () => {
                         {selectedNote.tags.map((tag) => (
                           <Badge key={tag} variant="outline">
                             {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNote.metadata?.wikiLinks && selectedNote.metadata.wikiLinks.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Wiki Links</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedNote.metadata.wikiLinks.map((linkedTitle) => (
+                          <Badge key={linkedTitle} variant="secondary">
+                            [[{linkedTitle}]]
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNote.metadata?.backlinks && selectedNote.metadata.backlinks.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Backlinks</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedNote.metadata.backlinks.map((backlink) => (
+                          <Badge key={backlink} variant="outline">
+                            {backlink}
                           </Badge>
                         ))}
                       </div>

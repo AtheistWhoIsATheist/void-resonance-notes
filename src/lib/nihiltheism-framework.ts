@@ -32,6 +32,10 @@ export interface Note {
     framework?: string;
     source?: string;
     idempotencyKey?: string;
+    importSource?: 'obsidian';
+    vaultFilePath?: string;
+    wikiLinks?: string[];
+    backlinks?: string[];
   };
 }
 
