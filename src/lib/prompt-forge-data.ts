@@ -1,8 +1,11 @@
 import {
+fix-git-merge-conflict-markers-2214115858903323228
 
   DensificationCycle,
   DensificationSlice,
-
+=======
+  DensificationCycle,
+  DensificationSlice,main
   PFCollection,
   PFConstraint,
   PFEnhancementProfile,
@@ -326,7 +329,11 @@ export const promptForgeAcceptanceTests = [
   "Scores render (0–100) with NT Alignment included.",
 ];
 
+fix-git-merge-conflict-markers-2214115858903323228
 
+=======
+ 
+main
 export const densificationSlices: DensificationSlice[] = [
   {
     id: "core-tenets",

@@ -9,7 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Edit3, 
   Trash2, 
   Tag,
@@ -20,6 +19,7 @@ import {
 import { nihiltheismFramework, Note } from '@/lib/nihiltheism-framework';
 import { toast } from '@/hooks/use-toast';
 import { BulkImport } from './BulkImport';
+import { ObsidianVaultImporter } from './ObsidianVaultImporter';
 
 export const NotesInterface = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -37,8 +37,9 @@ export const NotesInterface = () => {
     loadNotes();
     
     // Listen for vault-note-added events
-    const handleVaultNoteAdded = (event: any) => {
-      const note = event.detail;
+    const handleVaultNoteAdded = (event: Event) => {
+      const note = (event as CustomEvent<Note>).detail;
+      if (!note) return;
       setNotes(prev => [note, ...prev]);
       toast({
         title: "Note Added to Vault",
@@ -51,14 +52,27 @@ export const NotesInterface = () => {
   }, []);
 
   const loadNotes = () => {
-    const savedNotes = localStorage.getItem('infinity-notes');
-    if (savedNotes) {
-      const parsedNotes = JSON.parse(savedNotes).map((note: any) => ({
+    try {
+      const savedNotes = localStorage.getItem('infinity-notes');
+      if (!savedNotes) {
+        setNotes([]);
+        return;
+      }
+
+      const parsedNotes = JSON.parse(savedNotes).map((note: Partial<Note>) => ({
         ...note,
-        createdAt: new Date(note.createdAt),
-        updatedAt: new Date(note.updatedAt),
-      }));
+        createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
+        updatedAt: note.updatedAt ? new Date(note.updatedAt) : new Date(),
+      })) as Note[];
+
       setNotes(parsedNotes);
+    } catch {
+      setNotes([]);
+      toast({
+        title: "Could not load saved notes",
+        description: "Stored notes were corrupted and have been ignored.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -167,6 +181,14 @@ export const NotesInterface = () => {
     setTags('');
   };
 
+  const startCreatingNote = () => {
+    setSelectedNote(null);
+    setTitle('');
+    setContent('');
+    setTags('');
+    setIsEditing(true);
+  };
+
   const filteredNotes = notes.filter(note => {
     const matchesSearch = !searchQuery || 
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -197,13 +219,16 @@ export const NotesInterface = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-foreground">Notes</h2>
             <Button 
-              onClick={() => setIsEditing(true)}
+              onClick={startCreatingNote}
               className="bg-primary hover:bg-primary/90"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Note
             </Button>
           </div>
+
+          {/* Obsidian Wiki Import */}
+          <ObsidianVaultImporter onImported={loadNotes} />
 
           {/* Bulk Import */}
           <BulkImport />
@@ -301,6 +326,7 @@ export const NotesInterface = () => {
                             startEditing(note);
                           }}
                           className="h-6 w-6 p-0"
+                          aria-label="Edit note"
                         >
                           <Edit3 className="h-3 w-3" />
                         </Button>
@@ -312,6 +338,7 @@ export const NotesInterface = () => {
                             deleteNote(note.id);
                           }}
                           className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          aria-label="Delete note"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -459,6 +486,32 @@ export const NotesInterface = () => {
                         {selectedNote.tags.map((tag) => (
                           <Badge key={tag} variant="outline">
                             {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNote.metadata?.wikiLinks && selectedNote.metadata.wikiLinks.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Wiki Links</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedNote.metadata.wikiLinks.map((linkedTitle) => (
+                          <Badge key={linkedTitle} variant="secondary">
+                            [[{linkedTitle}]]
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedNote.metadata?.backlinks && selectedNote.metadata.backlinks.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Backlinks</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedNote.metadata.backlinks.map((backlink) => (
+                          <Badge key={backlink} variant="outline">
+                            {backlink}
                           </Badge>
                         ))}
                       </div>

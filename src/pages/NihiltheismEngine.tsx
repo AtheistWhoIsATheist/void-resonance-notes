@@ -164,7 +164,10 @@ export default function NihiltheismEngine() {
 
   useEffect(() => {
     if (!threads.length) return;
-    localStorage.setItem(THREAD_STORAGE_KEY, JSON.stringify(threads));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem(THREAD_STORAGE_KEY, JSON.stringify(threads));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [threads]);
 
   useEffect(() => {
@@ -286,7 +289,7 @@ export default function NihiltheismEngine() {
                   ...thread.messages,
                   {
                     id: createId(),
-                    role: "assistant",
+                    role: "assistant" as ChatRole,
                     content: `⚠️ Send failed: ${message}`,
                     createdAt: new Date().toISOString(),
                   },
