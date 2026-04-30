@@ -715,7 +715,6 @@ const PromptForge = () => {
                 <Card className="border-slate-900 bg-slate-950/80">
                   <CardHeader className="border-b border-slate-900/60 pb-4">
                     <CardTitle className="flex items-center gap-2 text-sm text-slate-100">
- codex/define-loveable-core-tenets-and-data-model
                       <Repeat2 className="h-4 w-4 text-cyan-400" /> Densification Protocol
                     </CardTitle>
                   </CardHeader>
@@ -775,7 +774,6 @@ const PromptForge = () => {
                 <Card className="border-slate-900 bg-slate-950/80">
                   <CardHeader className="border-b border-slate-900/60 pb-4">
                     <CardTitle className="flex items-center gap-2 text-sm text-slate-100">
- main
                       <Flame className="h-4 w-4 text-cyan-400" /> Constraint Matrix
                     </CardTitle>
                   </CardHeader>
