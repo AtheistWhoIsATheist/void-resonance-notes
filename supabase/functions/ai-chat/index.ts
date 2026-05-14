@@ -107,6 +107,55 @@ serve(async (req) => {
           systemPrompt += `\n\nUser's philosophical interests/tags: ${tagsContext}`;
           systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
         }
+
+        const { data: batches, error: batchesError } = await supabase
+          .from('ingestion_batches')
+          .select('id, source_label, import_mode, status, file_count, imported_count, duplicate_count, quarantined_count, error_count, review_count, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (!batchesError && batches && batches.length > 0) {
+          const batchContext = batches.map(batch =>
+            `- ${batch.source_label || batch.import_mode}: ${batch.status}, ${batch.imported_count}/${batch.file_count} imported, ${batch.duplicate_count} duplicates, ${batch.quarantined_count} quarantined, ${batch.review_count} review items`
+          ).join('\n');
+
+          systemPrompt += `\n\nRecent corpus intake batches:\n${batchContext}`;
+          systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
+        }
+
+        const { data: reviewItems, error: reviewError } = await supabase
+          .from('import_review_items')
+          .select('review_type, severity, title, details, created_at')
+          .eq('user_id', user.id)
+          .eq('status', 'open')
+          .order('created_at', { ascending: false })
+          .limit(8);
+
+        if (!reviewError && reviewItems && reviewItems.length > 0) {
+          const reviewContext = reviewItems.map(item =>
+            `- [${item.severity}] ${item.review_type}: ${item.title} ${JSON.stringify(item.details || {}).slice(0, 220)}`
+          ).join('\n');
+
+          systemPrompt += `\n\nOpen corpus review signals:\n${reviewContext}\n\nWhen answering, use these review signals to separate source-grounded claims from inferred or risky claims.`;
+          systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
+        }
+
+        const { data: canonicalDocs, error: docsError } = await supabase
+          .from('canonical_documents')
+          .select('title, canonical_path, status, word_count, heading_count, link_count')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (!docsError && canonicalDocs && canonicalDocs.length > 0) {
+          const docsContext = canonicalDocs.map(doc =>
+            `- ${doc.title} (${doc.status}) path=${doc.canonical_path}; words=${doc.word_count}; headings=${doc.heading_count}; links=${doc.link_count}`
+          ).join('\n');
+
+          systemPrompt += `\n\nRecent canonical corpus documents:\n${docsContext}`;
+          systemPrompt = systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS);
+        }
       }
     }
 

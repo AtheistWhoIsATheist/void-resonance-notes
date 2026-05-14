@@ -32,10 +32,16 @@ export interface Note {
     framework?: string;
     source?: string;
     idempotencyKey?: string;
-    importSource?: 'obsidian';
+    importSource?: 'obsidian' | 'supabase' | 'file-import' | 'folder-import' | 'bulk-import';
     vaultFilePath?: string;
     wikiLinks?: string[];
     backlinks?: string[];
+    source_hash?: string;
+    normalized_hash?: string;
+    source_file_id?: string;
+    canonical_document_id?: string;
+    canonical_path?: string;
+    chunk_count?: number;
   };
 }
 
