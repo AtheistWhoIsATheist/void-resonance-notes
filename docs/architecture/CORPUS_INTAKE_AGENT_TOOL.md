@@ -15,17 +15,21 @@ The tool exists to help the agent:
 
 ## Runtime Flow
 
-1. User attaches files or folders from the Nihiltheism agent workspace.
-2. `BulkImport` prepares source text and hashes in the browser.
-3. `bulk-import` stores source records, canonical documents, chunks, tags, notes, and review items.
-4. `BulkImport` stages a Corpus Intake Brief into the agent prompt.
-5. `ai-chat` can include recent ingestion batches, review items, and canonical documents when context is enabled.
-6. The agent uses that context to clarify and densify the imported corpus.
+1. User attaches `.txt`, `.text`, `.md`, or `.markdown` files from the root chatbot composer.
+2. `src/lib/corpus-intake.ts` prepares source text, normalizes line endings, hashes content, and builds the Corpus Intake Brief.
+3. `bulk-import` stores source records, canonical documents, chunks, tags, notes, Nihiltheism analysis metadata, and review items.
+4. The active conversation stores the latest ingestion batch ID and corpus brief.
+5. `ai-chat` receives the active batch ID, retrieves relevant document chunks, and injects provenance-aware corpus context into the model prompt.
+6. The agent uses that context to clarify, densify, and unravel the imported corpus as a living second brain.
+
+The older `BulkImport` card remains available for PKM/agent workspaces, but the root chatbot composer is now the primary seamless intake surface.
 
 ## Key Files
 
 - `src/pages/NihiltheismEngine.tsx`
+- `src/pages/Index.tsx`
 - `src/components/pkm/BulkImport.tsx`
+- `src/lib/corpus-intake.ts`
 - `supabase/functions/bulk-import/index.ts`
 - `supabase/functions/ai-chat/index.ts`
 - `supabase/migrations/20260510000000_file_ingestion_system.sql`

@@ -71,6 +71,11 @@ interface AnalysisResult {
   collectionId: string | null;
   relatedNoteIds: string[];
   reasoning?: string;
+  philosophicalTensions: string[];
+  keyQuestions: string[];
+  sourceAnchors: string[];
+  riskFlags: string[];
+  confidence: number;
   aiAvailable: boolean;
 }
 
@@ -447,25 +452,38 @@ async function analyzeNoteWithAI(
     tags: extractedTags.map((name) => ({ name, category: "source", color: "#64748b" })),
     collectionId: null,
     relatedNoteIds: [],
+    philosophicalTensions: [],
+    keyQuestions: [],
+    sourceAnchors: [],
+    riskFlags: [],
+    confidence: 0.35,
     aiAvailable: false,
   });
 
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!runAiAnalysis || !LOVABLE_API_KEY) return fallback();
 
-  const systemPrompt = `You are an AI assistant specializing in Nihiltheistic philosophy and knowledge organization. Analyze the provided note and return only valid JSON with this shape:
+  const systemPrompt = `You are a world-class Nihiltheism philosopher and corpus architect. Analyze the provided note for a living second-brain database. Return only valid JSON with this shape:
 {
   "concepts": ["concept1", "concept2"],
   "voidResonanceScore": 0.0,
   "tags": [{"name": "tag name", "category": "philosophy|concept|tradition|source", "color": "#64748b"}],
   "collectionSuggestion": "collection name or null",
   "relatedNoteIds": ["note-id-1", "note-id-2"],
+  "philosophicalTensions": ["source-grounded tension or unresolved dialectic"],
+  "keyQuestions": ["question the agent should pursue next"],
+  "sourceAnchors": ["short source-grounded phrase or heading from the note"],
+  "riskFlags": ["ambiguity, missing provenance, overreach, duplicate, or interpretive risk"],
+  "confidence": 0.0,
   "reasoning": "brief explanation"
 }
 
 Keep voidResonanceScore between 0 and 1.
+Keep confidence between 0 and 1.
 Never invent relatedNoteIds; choose only IDs from the supplied existing-note list.
-Prefer existing tags where they fit.`;
+Prefer existing tags where they fit.
+Separate source-grounded claims from AI-inferred labels.
+Do not force closure: preserve apophatic uncertainty and unresolved tensions.`;
 
   const notesContext = existingNotes
     .slice(0, MAX_EXISTING_NOTES_FOR_AI)
@@ -532,6 +550,19 @@ ${notesContext}`;
       relatedNoteIds: Array.isArray(analysis.relatedNoteIds)
         ? unique(analysis.relatedNoteIds.map(String)).filter((id) => allowedIds.has(id)).slice(0, 20)
         : [],
+      philosophicalTensions: Array.isArray(analysis.philosophicalTensions)
+        ? unique(analysis.philosophicalTensions.map(String)).slice(0, 12)
+        : [],
+      keyQuestions: Array.isArray(analysis.keyQuestions)
+        ? unique(analysis.keyQuestions.map(String)).slice(0, 12)
+        : [],
+      sourceAnchors: Array.isArray(analysis.sourceAnchors)
+        ? unique(analysis.sourceAnchors.map(String)).slice(0, 10)
+        : [],
+      riskFlags: Array.isArray(analysis.riskFlags)
+        ? unique(analysis.riskFlags.map(String)).slice(0, 12)
+        : [],
+      confidence: Math.max(0, Math.min(1, Number(analysis.confidence) || 0.5)),
       reasoning: typeof analysis.reasoning === "string" ? analysis.reasoning : undefined,
       aiAvailable: true,
     };
@@ -862,6 +893,14 @@ serve(async (req) => {
           markdown_links: markdownLinks.map((link) => link.target),
           provenance_labels: ["Source-grounded", analysis.aiAvailable ? "AI-generated" : "Source-grounded with interpretation"],
           ai_reasoning: analysis.reasoning || null,
+          nihiltheism_analysis: {
+            philosophical_tensions: analysis.philosophicalTensions,
+            key_questions: analysis.keyQuestions,
+            source_anchors: analysis.sourceAnchors,
+            risk_flags: analysis.riskFlags,
+            confidence: analysis.confidence,
+            ai_available: analysis.aiAvailable,
+          },
         };
 
         const { data: createdNote, error: noteError } = await supabaseClient
@@ -1038,6 +1077,11 @@ serve(async (req) => {
                 concepts: analysis.concepts,
                 tags: allTagSuggestions.map((tag) => tag.name),
                 relatedNoteIds: analysis.relatedNoteIds,
+                philosophicalTensions: analysis.philosophicalTensions,
+                keyQuestions: analysis.keyQuestions,
+                sourceAnchors: analysis.sourceAnchors,
+                riskFlags: analysis.riskFlags,
+                confidence: analysis.confidence,
                 reasoning: analysis.reasoning || null,
               },
             }),
