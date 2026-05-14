@@ -1,45 +1,62 @@
 # Void Resonance Notes
 
-A single-repo workspace for the **Philovoid** web app and related knowledge/AI tooling.
+Void Resonance Notes is a single deployable React/Vite application for Nihiltheism research, notes, philosophical analysis, corpus intake, and knowledge-graph experimentation.
 
-## What this repository actually contains
+The repo has explicit zones:
 
-This repo is currently one deployable React/Vite application plus backend assets:
+- `src/` - the running web app.
+- `supabase/` - database migrations, Edge Functions, and Supabase config.
+- `content/` - source Markdown corpus material used by the app and research process.
+- `docs/` - architecture, operating notes, and project reference.
+- `prisma/` - schema snapshots and data-model experiments.
+- `scripts/` - local maintenance and benchmark utilities.
 
-- **Frontend app** (`src/`): React + TypeScript UI for notes, philosophy tools, and knowledge graph workflows.
-- **Supabase backend** (`supabase/`): Edge functions, DB migrations, and local config.
-- **Prisma schema** (`prisma/`): Data model snapshots/experiments.
-- **Architecture docs** (`docs/`): design notes and project planning.
-
-If it feels like “multiple projects mashed together,” that’s because multiple *feature modules* are living in one app without strong boundaries yet.
-
-## Quick start
+## Quick Start
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Current top-level map
+Useful checks:
 
-- `src/pages/` route-level pages (Notes, Analysis, PhilosophyLab, Nihiltheism, PromptForge, etc.)
-- `src/components/` reusable UI and feature components
-- `src/lib/` app libraries (AI orchestration, markdown export, config, framework logic)
-- `src/integrations/supabase/` Supabase client/types for frontend
-- `supabase/functions/` Edge Functions (`ai-chat`, `semantic-search`, `generate-embeddings`, etc.)
-- `supabase/migrations/` SQL migration history
-- `docs/` architecture and cleanup planning docs
+```bash
+npm run build
+npm run lint
+```
 
-## Cleanup + organization plan
+## Architecture Map
 
-See **`docs/REPO_ORGANIZATION_PLAN.md`** for a concrete plan to:
+Read these first:
 
-1. Define clear boundaries between `app`, `docs`, and `experiments`.
-2. Consolidate feature modules under a predictable folder layout.
-3. Decide what should stay in this repo vs move to separate repos.
-4. Reduce dead code and duplicated concepts.
+- `docs/PROJECT_STRUCTURE.md` - the current folder contract.
+- `docs/INDEX.md` - documentation index.
+- `docs/architecture/PHILOVOID_ARCHITECTURE.md` - long-form architecture specification.
+- `docs/architecture/CORPUS_INTAKE_AGENT_TOOL.md` - how file/corpus ingestion belongs to the agent workflow.
+- `docs/operations/REPO_ORGANIZATION_PLAN.md` - incremental organization plan.
 
-## Notes
+## Product Surfaces
 
-- Legacy Lovable boilerplate text has been removed from this README.
-- Original architecture spec remains at `docs/PHILOVOID_ARCHITECTURE.md`.
+- Notes and PKM: `src/pages/Notes.tsx`, `src/components/pkm/`
+- Nihiltheism agent: `src/pages/NihiltheismEngine.tsx`
+- Philosophy Lab: `src/pages/PhilosophyLab.tsx`, `src/components/philosophy-lab/`
+- Knowledge Atlas: `src/pages/KnowledgeAtlas.tsx`, `src/components/knowledge-atlas/`
+- UNC Engine: `src/pages/UncEngine.tsx`, `src/components/unc-engine/`
+- Prompt Forge: `src/pages/PromptForge.tsx`, `src/data/promptForge.ts`
+
+## Corpus Intake
+
+The file-ingestion capability is not a standalone app. It is an agent tool:
+
+1. Source files are imported through the corpus intake tool in the Nihiltheism agent workspace.
+2. Supabase records source files, hashes, canonical documents, chunks, review items, and batch reports.
+3. The agent receives a Corpus Intake Brief so it can clarify, densify, and unravel philosophical chaos from the imported material.
+
+## Content Corpus
+
+The Markdown source corpus lives under:
+
+- `content/definitions/source-notes/`
+- `content/nihilism/source-notes/`
+
+These files are research material, not runtime source code.

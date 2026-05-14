@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +18,45 @@ import {
 } from 'lucide-react';
 import { nihiltheismFramework, Note } from '@/lib/nihiltheism-framework';
 import { toast } from '@/hooks/use-toast';
-import { BulkImport } from './BulkImport';
 import { ObsidianVaultImporter } from './ObsidianVaultImporter';
+import { supabase } from '@/integrations/supabase/client';
+
+type RemoteNoteRow = {
+  id: string;
+  title: string;
+  content: string | null;
+  detected_concepts: unknown;
+  custom_metadata: unknown;
+  void_resonance_score: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+  source: string | null;
+};
+
+const mapRemoteNote = (note: RemoteNoteRow): Note => {
+  const metadata = typeof note.custom_metadata === 'object' && note.custom_metadata !== null
+    ? note.custom_metadata as Record<string, unknown>
+    : {};
+  const tags = Array.isArray(metadata.tags) ? metadata.tags.map(String) : [];
+  const concepts = Array.isArray(note.detected_concepts) ? note.detected_concepts.map(String) : [];
+
+  return {
+    id: note.id,
+    title: note.title,
+    content: note.content || '',
+    tags,
+    concepts,
+    createdAt: note.created_at ? new Date(note.created_at) : new Date(),
+    updatedAt: note.updated_at ? new Date(note.updated_at) : new Date(),
+    densificationLevel: 1,
+    voidResonanceScore: note.void_resonance_score ?? undefined,
+    metadata: {
+      ...metadata,
+      source: note.source || undefined,
+      importSource: 'supabase',
+    },
+  };
+};
 
 export const NotesInterface = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -33,8 +70,57 @@ export const NotesInterface = () => {
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
 
+  const loadNotes = useCallback(async () => {
+    try {
+      const savedNotes = localStorage.getItem('infinity-notes');
+      const parsedNotes = savedNotes ? JSON.parse(savedNotes).map((note: Partial<Note>) => ({
+        ...note,
+        createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
+        updatedAt: note.updatedAt ? new Date(note.updatedAt) : new Date(),
+      })) as Note[] : [];
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        setNotes(parsedNotes);
+        return;
+      }
+
+      const { data: remoteNotes, error } = await supabase
+        .from('notes')
+        .select('id, title, content, detected_concepts, custom_metadata, void_resonance_score, created_at, updated_at, source')
+        .order('updated_at', { ascending: false })
+        .limit(500);
+
+      if (error) throw error;
+
+      const mappedRemoteNotes = (remoteNotes || []).map(mapRemoteNote);
+      const remoteIds = new Set(mappedRemoteNotes.map(note => note.id));
+      setNotes([
+        ...mappedRemoteNotes,
+        ...parsedNotes.filter(note => !remoteIds.has(note.id)),
+      ]);
+    } catch {
+      const savedNotes = localStorage.getItem('infinity-notes');
+      if (savedNotes) {
+        const parsedNotes = JSON.parse(savedNotes).map((note: Partial<Note>) => ({
+          ...note,
+          createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
+          updatedAt: note.updatedAt ? new Date(note.updatedAt) : new Date(),
+        })) as Note[];
+        setNotes(parsedNotes);
+      } else {
+        setNotes([]);
+      }
+      toast({
+        title: "Could not load saved notes",
+        description: "Remote notes could not be loaded, so the local vault view was used.",
+        variant: "destructive"
+      });
+    }
+  }, []);
+
   useEffect(() => {
-    loadNotes();
+    void loadNotes();
     
     // Listen for vault-note-added events
     const handleVaultNoteAdded = (event: Event) => {
@@ -49,35 +135,11 @@ export const NotesInterface = () => {
     
     window.addEventListener('vault-note-added', handleVaultNoteAdded);
     return () => window.removeEventListener('vault-note-added', handleVaultNoteAdded);
-  }, []);
-
-  const loadNotes = () => {
-    try {
-      const savedNotes = localStorage.getItem('infinity-notes');
-      if (!savedNotes) {
-        setNotes([]);
-        return;
-      }
-
-      const parsedNotes = JSON.parse(savedNotes).map((note: Partial<Note>) => ({
-        ...note,
-        createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
-        updatedAt: note.updatedAt ? new Date(note.updatedAt) : new Date(),
-      })) as Note[];
-
-      setNotes(parsedNotes);
-    } catch {
-      setNotes([]);
-      toast({
-        title: "Could not load saved notes",
-        description: "Stored notes were corrupted and have been ignored.",
-        variant: "destructive"
-      });
-    }
-  };
+  }, [loadNotes]);
 
   const saveNotes = (updatedNotes: Note[]) => {
-    localStorage.setItem('infinity-notes', JSON.stringify(updatedNotes));
+    const localNotes = updatedNotes.filter(note => note.metadata?.importSource !== 'supabase');
+    localStorage.setItem('infinity-notes', JSON.stringify(localNotes));
     setNotes(updatedNotes);
   };
 
@@ -227,11 +289,8 @@ export const NotesInterface = () => {
             </Button>
           </div>
 
-          {/* Obsidian Wiki Import */}
-          <ObsidianVaultImporter onImported={loadNotes} />
-
-          {/* Bulk Import */}
-          <BulkImport />
+          {/* Obsidian Vault Import */}
+          <ObsidianVaultImporter onImported={() => { void loadNotes(); }} />
 
           {/* Search and Filter */}
           <div className="space-y-3">
@@ -489,6 +548,13 @@ export const NotesInterface = () => {
                           </Badge>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {selectedNote.metadata?.vaultFilePath && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Vault Path</h4>
+                      <Badge variant="outline">{selectedNote.metadata.vaultFilePath}</Badge>
                     </div>
                   )}
 

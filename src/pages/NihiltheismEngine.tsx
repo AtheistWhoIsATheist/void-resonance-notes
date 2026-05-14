@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BulkImport } from "@/components/pkm/BulkImport";
 import {
   Bot,
   Brain,
@@ -64,7 +65,7 @@ const AVAILABLE_MODELS = [
 ];
 
 const DEFAULT_SYSTEM_PROMPT =
-  "You are the Ultra-Supreme Nihiltheistic Interlocutor. Blend precision, philosophical depth, and practical utility. Use concise structure, provide assumptions, and clearly mark speculative claims.";
+  "You are the Ultra-Supreme Nihiltheistic Interlocutor. Blend precision, philosophical depth, and practical utility. Use concise structure, provide assumptions, and clearly mark speculative claims. When a Corpus Intake Brief is present, treat imported files as working philosophical material: clarify tensions, densify concepts, separate source-grounded claims from inferred metadata, and identify review risks before synthesis.";
 
 const createId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -127,6 +128,7 @@ export default function NihiltheismEngine() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const [lastIngestionBrief, setLastIngestionBrief] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -140,15 +142,16 @@ export default function NihiltheismEngine() {
       return;
     }
 
-    let parsedThreads: ChatThread[] = [];
-    try {
-      const raw = JSON.parse(savedThreads);
-      parsedThreads = Array.isArray(raw)
-        ? raw.map(ensureThreadShape).filter((thread): thread is ChatThread => Boolean(thread))
-        : [];
-    } catch {
-      parsedThreads = [];
-    }
+    const parsedThreads: ChatThread[] = (() => {
+      try {
+        const raw = JSON.parse(savedThreads);
+        return Array.isArray(raw)
+          ? raw.map(ensureThreadShape).filter((thread): thread is ChatThread => Boolean(thread))
+          : [];
+      } catch {
+        return [];
+      }
+    })();
 
     if (!parsedThreads.length) {
       const starterThread = createNewThread();
@@ -164,10 +167,7 @@ export default function NihiltheismEngine() {
 
   useEffect(() => {
     if (!threads.length) return;
-    const timeoutId = setTimeout(() => {
-      localStorage.setItem(THREAD_STORAGE_KEY, JSON.stringify(threads));
-    }, 500);
-    return () => clearTimeout(timeoutId);
+    localStorage.setItem(THREAD_STORAGE_KEY, JSON.stringify(threads));
   }, [threads]);
 
   useEffect(() => {
@@ -354,6 +354,16 @@ export default function NihiltheismEngine() {
     toast({ title: "Copied", description: "Last assistant response copied to clipboard." });
   };
 
+  const stageCorpusBrief = (brief: string) => {
+    setLastIngestionBrief(brief);
+    setInput(brief);
+    updateActiveThread((thread) => ({ ...thread, includeContext: true }));
+    toast({
+      title: "Corpus brief staged",
+      description: "The ingestion result is ready in the agent prompt with vault context enabled.",
+    });
+  };
+
   if (!activeThread) {
     return <div className="min-h-screen bg-background" />;
   }
@@ -486,78 +496,92 @@ export default function NihiltheismEngine() {
         </Card>
 
         {isRightPanelOpen && (
-          <Card className="w-full lg:w-[320px] border-zinc-800 bg-zinc-900/70 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Brain className="h-4 w-4 text-violet-300" /> Pro Controls
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="model" className="space-y-4">
-                <TabsList className="grid grid-cols-2 bg-zinc-950/70">
-                  <TabsTrigger value="model">Runtime</TabsTrigger>
-                  <TabsTrigger value="system">System</TabsTrigger>
-                </TabsList>
+          <div className="w-full lg:w-[380px] space-y-4">
+            <Card className="border-zinc-800 bg-zinc-900/70 backdrop-blur-md">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-violet-300" /> Agent Controls
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="model" className="space-y-4">
+                  <TabsList className="grid grid-cols-2 bg-zinc-950/70">
+                    <TabsTrigger value="model">Runtime</TabsTrigger>
+                    <TabsTrigger value="system">System</TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="model" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="model">Model</Label>
-                    <select
-                      id="model"
-                      value={activeThread.model}
-                      onChange={(event) =>
-                        updateActiveThread((thread) => ({ ...thread, model: event.target.value }))
-                      }
-                      className="w-full h-10 rounded-md border border-zinc-700 bg-zinc-950 px-3 text-sm"
-                    >
-                      {AVAILABLE_MODELS.map((model) => (
-                        <option key={model} value={model}>
-                          {model}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-lg border border-zinc-800 p-3">
-                    <div>
-                      <p className="text-sm font-medium">Include vault context</p>
-                      <p className="text-xs text-zinc-500">Inject notes + tags into system context.</p>
+                  <TabsContent value="model" className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="model">Model</Label>
+                      <select
+                        id="model"
+                        value={activeThread.model}
+                        onChange={(event) =>
+                          updateActiveThread((thread) => ({ ...thread, model: event.target.value }))
+                        }
+                        className="w-full h-10 rounded-md border border-zinc-700 bg-zinc-950 px-3 text-sm"
+                      >
+                        {AVAILABLE_MODELS.map((model) => (
+                          <option key={model} value={model}>
+                            {model}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <Switch
-                      checked={activeThread.includeContext}
-                      onCheckedChange={(checked) =>
-                        updateActiveThread((thread) => ({ ...thread, includeContext: checked }))
-                      }
-                    />
-                  </div>
-                </TabsContent>
 
-                <TabsContent value="system" className="space-y-2">
-                  <Label htmlFor="system">System Prompt</Label>
-                  <Textarea
-                    id="system"
-                    value={activeThread.systemPrompt}
-                    onChange={(event) =>
-                      updateActiveThread((thread) => ({ ...thread, systemPrompt: event.target.value }))
-                    }
-                    className="min-h-[220px] bg-zinc-950/70 border-zinc-700"
-                  />
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() =>
-                      updateActiveThread((thread) => ({
-                        ...thread,
-                        systemPrompt: DEFAULT_SYSTEM_PROMPT,
-                      }))
-                    }
-                  >
-                    Reset to Ultra Default
-                  </Button>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                    <div className="flex items-center justify-between rounded-lg border border-zinc-800 p-3">
+                      <div>
+                        <p className="text-sm font-medium">Include vault context</p>
+                        <p className="text-xs text-zinc-500">Inject notes, tags, and ingestion state.</p>
+                      </div>
+                      <Switch
+                        checked={activeThread.includeContext}
+                        onCheckedChange={(checked) =>
+                          updateActiveThread((thread) => ({ ...thread, includeContext: checked }))
+                        }
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="system" className="space-y-2">
+                    <Label htmlFor="system">System Prompt</Label>
+                    <Textarea
+                      id="system"
+                      value={activeThread.systemPrompt}
+                      onChange={(event) =>
+                        updateActiveThread((thread) => ({ ...thread, systemPrompt: event.target.value }))
+                      }
+                      className="min-h-[220px] bg-zinc-950/70 border-zinc-700"
+                    />
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() =>
+                        updateActiveThread((thread) => ({
+                          ...thread,
+                          systemPrompt: DEFAULT_SYSTEM_PROMPT,
+                        }))
+                      }
+                    >
+                      Reset to Ultra Default
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            <BulkImport mode="agent" onAgentBrief={stageCorpusBrief} />
+
+            {lastIngestionBrief && (
+              <Card className="border-zinc-800 bg-zinc-900/70 backdrop-blur-md">
+                <CardContent className="p-3">
+                  <p className="text-xs text-zinc-400">
+                    Latest corpus brief is staged in the prompt box. Send it to have the agent clarify, densify, and map review risks.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
       </div>
     </div>
