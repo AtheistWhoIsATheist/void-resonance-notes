@@ -1,184 +1,277 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  BookOpen, 
-  Brain, 
-  Infinity, 
-  Sparkles, 
-  Layers,
-  ArrowRight
-} from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { PanelLeft, Plus, Send, Copy, Trash2, Pencil, MessageSquareText } from 'lucide-react';
+import { ChatMessage, createDefaultConversation, MockStreamingProvider } from '@/lib/chatProvider';
+
+interface Conversation {
+  id: string;
+  title: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+}
+
+const STORAGE_KEY = 'nihiltheism-chat-conversations-v1';
+
+const getConversationPreview = (conversation: Conversation) => {
+  const recent = [...conversation.messages].reverse().find((message) => message.role !== 'system');
+  return recent?.content || 'No messages yet';
+};
 
 const Index = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string>('');
+  const [draft, setDraft] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  const provider = useMemo(() => new MockStreamingProvider(), []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Conversation[];
+      setConversations(parsed);
+      setActiveConversationId(parsed[0]?.id ?? '');
+      return;
+    }
+
+    const initial: Conversation = {
+      id: crypto.randomUUID(),
+      title: 'New Research Thread',
+      updatedAt: new Date().toISOString(),
+      messages: createDefaultConversation()
+    };
+    setConversations([initial]);
+    setActiveConversationId(initial.id);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+  }, [conversations]);
+
+  const active = conversations.find((conversation) => conversation.id === activeConversationId);
+
+  const updateConversation = (conversationId: string, updater: (current: Conversation) => Conversation) => {
+    setConversations((current) =>
+      current.map((conversation) => (conversation.id === conversationId ? updater(conversation) : conversation))
+    );
+  };
+
+  const createConversation = () => {
+    const conversation: Conversation = {
+      id: crypto.randomUUID(),
+      title: 'Untitled Thread',
+      updatedAt: new Date().toISOString(),
+      messages: createDefaultConversation()
+    };
+    setConversations((current) => [conversation, ...current]);
+    setActiveConversationId(conversation.id);
+  };
+
+  const deleteConversation = (conversationId: string) => {
+    setConversations((current) => {
+      const filtered = current.filter((conversation) => conversation.id !== conversationId);
+      if (!filtered.length) {
+        const fallback: Conversation = {
+          id: crypto.randomUUID(),
+          title: 'New Research Thread',
+          updatedAt: new Date().toISOString(),
+          messages: createDefaultConversation()
+        };
+        setActiveConversationId(fallback.id);
+        return [fallback];
+      }
+
+      if (activeConversationId === conversationId) {
+        setActiveConversationId(filtered[0].id);
+      }
+      return filtered;
+    });
+  };
+
+  const renameConversation = (conversationId: string) => {
+    const current = conversations.find((conversation) => conversation.id === conversationId);
+    const nextTitle = window.prompt('Rename conversation', current?.title || '');
+    if (!nextTitle?.trim()) return;
+
+    updateConversation(conversationId, (conversation) => ({
+      ...conversation,
+      title: nextTitle.trim(),
+      updatedAt: new Date().toISOString()
+    }));
+  };
+
+  const clearActiveConversation = () => {
+    if (!active) return;
+    updateConversation(active.id, (conversation) => ({
+      ...conversation,
+      updatedAt: new Date().toISOString(),
+      messages: createDefaultConversation()
+    }));
+  };
+
+  const onSend = async () => {
+    if (!draft.trim() || !active || isStreaming) return;
+
+    const conversationId = active.id;
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: draft.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    const assistantMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content: '',
+      createdAt: new Date().toISOString()
+    };
+
+    setDraft('');
+    setIsStreaming(true);
+
+    updateConversation(conversationId, (conversation) => ({
+      ...conversation,
+      title: conversation.title === 'Untitled Thread' ? userMessage.content.slice(0, 40) : conversation.title,
+      updatedAt: new Date().toISOString(),
+      messages: [...conversation.messages, userMessage, assistantMessage]
+    }));
+
+    await provider.streamReply([...(active.messages ?? []), userMessage], (chunk) => {
+      updateConversation(conversationId, (conversation) => ({
+        ...conversation,
+        updatedAt: new Date().toISOString(),
+        messages: conversation.messages.map((message) =>
+          message.id === assistantMessage.id ? { ...message, content: `${message.content}${chunk.delta}` } : message
+        )
+      }));
+
+      if (chunk.done) {
+        setIsStreaming(false);
+      }
+    });
+  };
+
+  const assistantIsTyping = isStreaming && active?.messages.some((message) => message.role === 'assistant' && !message.content);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-20 px-4">
-        <div className="container mx-auto text-center max-w-4xl">
-          <div className="flex items-center justify-center mb-8">
-            <Infinity className="h-16 w-16 text-resonance mr-4 animate-pulse" />
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-synthesis bg-clip-text text-transparent">
-              Infinity Notes
-            </h1>
-          </div>
-          
-          <h2 className="text-2xl md:text-3xl text-foreground mb-6 font-light">
-            Nihiltheism Explorer
-          </h2>
-          
-          <p className="text-xl text-muted-foreground mb-12 leading-relaxed max-w-2xl mx-auto">
-            A sophisticated PKM system that transforms note-taking into philosophical practice. 
-            Explore the void-to-resonance paradigm through iterative densification methodology.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-              <Link to="/notes">
-                <BookOpen className="h-5 w-5 mr-2" />
-                Start Taking Notes
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8">
-              <Link to="/philosophy-lab">
-                <Brain className="h-5 w-5 mr-2" />
-                Philosophy Lab
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-16 px-4 bg-card/30">
-        <div className="container mx-auto max-w-6xl">
-          <h3 className="text-3xl font-bold text-center mb-12 text-foreground">
-            Digital Philosophy Laboratory
-          </h3>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="shadow-contemplative hover:shadow-focus transition-contemplative">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-primary/10 rounded-lg mr-3">
-                    <Brain className="h-6 w-6 text-primary" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Concept Detection</h4>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  Automatic identification of Nihiltheistic concepts with cross-cultural synthesis 
-                  including Buddhist śūnyatā, Advaitic māyā, and Sufi fanā'.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-contemplative hover:shadow-focus transition-contemplative">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-resonance/10 rounded-lg mr-3">
-                    <Sparkles className="h-6 w-6 text-resonance" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Void Resonance Scoring</h4>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  Quantitative assessment of transcendent potential (0-100 scale) based on 
-                  philosophical depth and conceptual integration.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-contemplative hover:shadow-focus transition-contemplative">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-synthesis/10 rounded-lg mr-3">
-                    <Layers className="h-6 w-6 text-synthesis" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Iterative Densification</h4>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  Three-level recursive analysis: Conceptual Mapping, Cross-Cultural Synthesis, 
-                  and Phenomenological Architecture.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-contemplative hover:shadow-focus transition-contemplative">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-void/10 rounded-lg mr-3">
-                    <Brain className="h-6 w-6 text-void" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Professor Nihil AI</h4>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  Interactive dialogue system for recursive philosophical inquiry with 
-                  contextual response generation and framework integration.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-contemplative hover:shadow-focus transition-contemplative">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-accent/10 rounded-lg mr-3">
-                    <BookOpen className="h-6 w-6 text-accent" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Advanced PKM</h4>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  Sophisticated note management with automatic concept linking, 
-                  tag-based organization, and philosophical intelligence.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-contemplative hover:shadow-focus transition-contemplative">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="p-2 bg-primary/10 rounded-lg mr-3">
-                    <Infinity className="h-6 w-6 text-primary" />
-                  </div>
-                  <h4 className="text-lg font-semibold">Contemplative Design</h4>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  Dark, minimalist interface optimized for deep focus and extended 
-                  philosophical contemplation with meditative transitions.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Philosophy Quote */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto text-center max-w-3xl">
-          <blockquote className="text-2xl md:text-3xl font-light text-foreground mb-6 italic leading-relaxed">
-            "The void is not mere absence, but the space of all possibilities - 
-            the pregnant emptiness from which transcendence emerges."
-          </blockquote>
-          <p className="text-muted-foreground">— Core Nihiltheistic Insight</p>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-16 px-4 bg-gradient-void">
-        <div className="container mx-auto text-center max-w-2xl">
-          <h3 className="text-3xl font-bold mb-6 text-foreground">
-            Begin Your Philosophical Journey
-          </h3>
-          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-            Transform your knowledge management into contemplative practice. 
-            Explore the depths of existence through systematic philosophical inquiry.
-          </p>
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-            <Link to="/notes">
-              <span>Enter the Laboratory</span>
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Link>
+    <div className="h-screen bg-background text-foreground flex">
+      {isSidebarOpen && (
+        <aside className="w-full max-w-[290px] border-r border-border p-3 sm:p-4 flex flex-col gap-3 bg-card/40">
+          <Button onClick={createConversation} className="w-full justify-start gap-2" aria-label="Create new conversation">
+            <Plus className="h-4 w-4" />
+            New conversation
           </Button>
+          <ScrollArea className="flex-1 pr-2">
+            <div className="space-y-2">
+              {conversations.map((conversation) => (
+                <div key={conversation.id} className="group rounded-lg border border-border bg-background/80">
+                  <button
+                    onClick={() => setActiveConversationId(conversation.id)}
+                    className={`w-full text-left rounded-t-lg px-3 py-2 transition ${
+                      conversation.id === activeConversationId ? 'bg-accent' : 'hover:bg-accent/50'
+                    }`}
+                    aria-label={`Open conversation ${conversation.title}`}
+                  >
+                    <p className="text-sm font-medium truncate">{conversation.title}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">{getConversationPreview(conversation)}</p>
+                  </button>
+                  <div className="flex items-center justify-end gap-1 px-2 pb-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <Button size="icon" variant="ghost" onClick={() => renameConversation(conversation.id)} aria-label="Rename conversation">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => deleteConversation(conversation.id)} aria-label="Delete conversation">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </aside>
+      )}
+
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="border-b border-border px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen((value) => !value)} aria-label="Toggle sidebar">
+              <PanelLeft className="h-4 w-4" />
+            </Button>
+            <div className="min-w-0">
+              <h1 className="font-semibold truncate">Nihiltheism Autonomous Research Agent</h1>
+              <p className="text-xs text-muted-foreground truncate">{active?.title || 'No active conversation'}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={clearActiveConversation} disabled={!active}>
+            Clear
+          </Button>
+        </header>
+
+        <ScrollArea className="flex-1 px-3 sm:px-5 py-4 sm:py-6">
+          {!active?.messages.filter((message) => message.role !== 'system').length ? (
+            <div className="max-w-2xl mx-auto text-center text-muted-foreground py-16">
+              <MessageSquareText className="h-10 w-10 mx-auto mb-3 opacity-70" />
+              <p className="text-sm">Start a thread for anti-reifying analysis and apophatic inquiry.</p>
+            </div>
+          ) : (
+            <div className="max-w-3xl mx-auto space-y-5">
+              {active?.messages
+                .filter((message) => message.role !== 'system')
+                .map((message) => (
+                  <article key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[90%] sm:max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap border ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground border-primary/20'
+                        : 'bg-card text-card-foreground border-border shadow-sm'
+                    }`}>
+                      <p>{message.content}</p>
+                      <div className="mt-2 flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => navigator.clipboard.writeText(message.content)}
+                          aria-label="Copy message"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              {assistantIsTyping && <p className="text-xs text-muted-foreground ml-2">Assistant is typing…</p>}
+            </div>
+          )}
+        </ScrollArea>
+
+        <div className="border-t border-border p-3 sm:p-4">
+          <div className="max-w-3xl mx-auto">
+            <label htmlFor="chat-composer" className="sr-only">Message composer</label>
+            <textarea
+              id="chat-composer"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  void onSend();
+                }
+              }}
+              placeholder="Present a claim for anti-reifying analysis…"
+              className="w-full min-h-[84px] max-h-56 resize-y rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              aria-label="Chat message input"
+            />
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">Enter to send • Shift+Enter for newline</p>
+              <Button onClick={() => void onSend()} disabled={isStreaming || !draft.trim()} aria-label="Send message">
+                <Send className="h-4 w-4 mr-1" /> Send
+              </Button>
+            </div>
+          </div>
         </div>
-      </section>
+      </main>
     </div>
   );
 };

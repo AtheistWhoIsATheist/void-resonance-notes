@@ -114,7 +114,6 @@ export interface PFSettings {
   };
   keyboard: Record<string, string>;
 }
- 
 
 export interface DensificationSlice {
   id: string;
@@ -129,4 +128,3 @@ export interface DensificationCycle {
   assurance: string;
   artifacts: string[];
 }
-

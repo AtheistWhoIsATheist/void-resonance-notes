@@ -1,73 +1,45 @@
-# Welcome to your Lovable project
+# Void Resonance Notes
 
-## Project info
+A single-repo workspace for the **Philovoid** web app and related knowledge/AI tooling.
 
-**URL**: https://lovable.dev/projects/71d58263-31ea-4e66-badf-17c688a96b0a
+## What this repository actually contains
 
-## How can I edit this code?
+This repo is currently one deployable React/Vite application plus backend assets:
 
-There are several ways of editing your application.
+- **Frontend app** (`src/`): React + TypeScript UI for notes, philosophy tools, and knowledge graph workflows.
+- **Supabase backend** (`supabase/`): Edge functions, DB migrations, and local config.
+- **Prisma schema** (`prisma/`): Data model snapshots/experiments.
+- **Architecture docs** (`docs/`): design notes and project planning.
 
-**Use Lovable**
+If it feels like “multiple projects mashed together,” that’s because multiple *feature modules* are living in one app without strong boundaries yet.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/71d58263-31ea-4e66-badf-17c688a96b0a) and start prompting.
+## Quick start
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Current top-level map
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- `src/pages/` route-level pages (Notes, Analysis, PhilosophyLab, Nihiltheism, PromptForge, etc.)
+- `src/components/` reusable UI and feature components
+- `src/lib/` app libraries (AI orchestration, markdown export, config, framework logic)
+- `src/integrations/supabase/` Supabase client/types for frontend
+- `supabase/functions/` Edge Functions (`ai-chat`, `semantic-search`, `generate-embeddings`, etc.)
+- `supabase/migrations/` SQL migration history
+- `docs/` architecture and cleanup planning docs
 
-**Use GitHub Codespaces**
+## Cleanup + organization plan
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+See **`docs/REPO_ORGANIZATION_PLAN.md`** for a concrete plan to:
 
-## What technologies are used for this project?
+1. Define clear boundaries between `app`, `docs`, and `experiments`.
+2. Consolidate feature modules under a predictable folder layout.
+3. Decide what should stay in this repo vs move to separate repos.
+4. Reduce dead code and duplicated concepts.
 
-This project is built with:
+## Notes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/71d58263-31ea-4e66-badf-17c688a96b0a) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Legacy Lovable boilerplate text has been removed from this README.
+- Original architecture spec remains at `docs/PHILOVOID_ARCHITECTURE.md`.

@@ -324,7 +324,6 @@ export const promptForgeAcceptanceTests = [
   "Scores render (0–100) with NT Alignment included.",
 ];
 
- 
 export const densificationSlices: DensificationSlice[] = [
   {
     id: "core-tenets",
