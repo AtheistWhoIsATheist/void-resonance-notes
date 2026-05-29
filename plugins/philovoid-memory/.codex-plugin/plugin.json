@@ -1,0 +1,42 @@
+{
+  "name": "philovoid-memory",
+  "version": "0.1.0",
+  "description": "Persistent, reviewable Philovoid memory workflows for Codex and ChatGPT sessions.",
+  "author": {
+    "name": "Philovoid",
+    "email": "maintainers@example.com",
+    "url": "https://github.com/AtheistWhoIsATheist/void-resonance-notes"
+  },
+  "homepage": "https://github.com/AtheistWhoIsATheist/void-resonance-notes/tree/main/plugins/philovoid-memory",
+  "repository": "https://github.com/AtheistWhoIsATheist/void-resonance-notes",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "codex",
+    "philovoid",
+    "notes",
+    "consolidation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Philovoid Memory",
+    "shortDescription": "Read, write, search, and consolidate Philovoid project memory.",
+    "longDescription": "Adds a repo-local memory workflow for Codex and ChatGPT agents working on Philovoid. The plugin keeps active memory separate from dream outputs so curations can be reviewed before promotion.",
+    "developerName": "Philovoid",
+    "category": "Productivity",
+    "capabilities": [
+      "Memory",
+      "Search",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/AtheistWhoIsATheist/void-resonance-notes",
+    "privacyPolicyURL": "https://github.com/AtheistWhoIsATheist/void-resonance-notes",
+    "termsOfServiceURL": "https://github.com/AtheistWhoIsATheist/void-resonance-notes",
+    "defaultPrompt": [
+      "Use Philovoid memory before making repository changes.",
+      "Remember this durable project preference in Philovoid memory.",
+      "Consolidate Philovoid memory into a reviewable dream output."
+    ],
+    "brandColor": "#7C3AED"
+  }
+}
