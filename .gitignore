@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Philovoid plugin runtime memory (private, review before sharing)
+.philovoid/
+
+# Python cache files
+__pycache__/
+*.py[cod]

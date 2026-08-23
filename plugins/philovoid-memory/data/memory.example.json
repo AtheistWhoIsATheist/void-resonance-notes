@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-05-07T00:00:00Z",
+  "entries": [
+    {
+      "id": "mem_example_preference",
+      "kind": "preference",
+      "title": "Final response format",
+      "content": "When code changes are made, summarize changed files and prefix each test/check command with a status emoji.",
+      "tags": ["codex", "workflow"],
+      "source": "developer-instructions",
+      "confidence": 1.0,
+      "status": "active",
+      "createdAt": "2026-05-07T00:00:00Z",
+      "updatedAt": "2026-05-07T00:00:00Z",
+      "supersedes": []
+    }
+  ]
+}

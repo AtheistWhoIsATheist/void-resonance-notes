@@ -1,0 +1,20 @@
+{
+  "name": "void-resonance-notes",
+  "interface": {
+    "displayName": "Void Resonance Notes Plugins"
+  },
+  "plugins": [
+    {
+      "name": "philovoid-memory",
+      "source": {
+        "source": "local",
+        "path": "./plugins/philovoid-memory"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
