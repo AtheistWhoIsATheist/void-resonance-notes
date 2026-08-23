@@ -43,6 +43,7 @@ Read these first:
 - Knowledge Atlas: `src/pages/KnowledgeAtlas.tsx`, `src/components/knowledge-atlas/`
 - UNC Engine: `src/pages/UncEngine.tsx`, `src/components/unc-engine/`
 - Prompt Forge: `src/pages/PromptForge.tsx`, `src/data/promptForge.ts`
+- Obsidian AI Philosopher: `plugins/philovoid/`
 
 ## Corpus Intake
 
