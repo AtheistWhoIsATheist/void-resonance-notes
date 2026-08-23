@@ -1,0 +1,9 @@
+{
+  "id": "philovoid",
+  "name": "Philovoid",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "A vault-native AI philosopher for interrogating, organizing, and developing philosophical writing.",
+  "author": "Philovoid",
+  "isDesktopOnly": false
+}
